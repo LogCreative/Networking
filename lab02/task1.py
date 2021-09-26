@@ -25,9 +25,9 @@ class NetworkTopo(Topo):
 
         # Wire up switches
         self.addLink(h1, s1)
-        self.addLink(s1, s3)
+        self.addLink(s1, s3, bw=10)
         self.addLink(h3, s3)
-        self.addLink(s1, s2)
+        self.addLink(s1, s2, bw=10)
         self.addLink(h2, s2)
 
 def run():
@@ -52,8 +52,7 @@ def run():
         info("*** testing", datapath, "datapath\n")
         Switch = switches[datapath]
         results[datapath]=[]
-        link = partial(TCLink, bw=100)
-        net = Mininet(topo=topo,switch=Switch,controller=Controller,link=link,waitConnected=True)
+        net = Mininet(topo=topo,switch=Switch,controller=Controller,waitConnected=True)
         net.start()
         for i in irange(0,2):
             for j in irange(i+1,2):

@@ -1,7 +1,5 @@
 # 3. Let us add another link between s2 and s3. 
 # Try pinging h2 from h1. What would happen? 
-# How would you solve the problem? 
-# (Hint: Use ovs-ofctl command to add flow rules. )
 # 
 # h1--s1--s2--h2
 #      | /

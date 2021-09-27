@@ -1,5 +1,4 @@
-# 3. Let us add another link between s2 and s3. 
-# Try pinging h2 from h1. What would happen? 
+# 3. 
 # How would you solve the problem? 
 # (Hint: Use ovs-ofctl command to add flow rules. )
 # 
@@ -28,7 +27,7 @@ class NetworkTopo(Topo):
         self.addLink(s1, s3, bw=10, loss=5)
 
         # New link between s2, s3
-        # self.addLink(s2, s3, bw=10, loss=5)
+        self.addLink(s2, s3, bw=10, loss=5)
 
         self.addLink(h1, s1)
         self.addLink(h3, s3)
@@ -37,10 +36,12 @@ class NetworkTopo(Topo):
 def pingTest():
     topo = NetworkTopo()
     net = Mininet(topo=topo,link=TCLink,autoStaticArp=True)
-    run('sudo ovs-ofctl add-flow s3 "in_port=1 actions=output:2"')
-    run('sudo ovs-ofctl add-flow s2 "in_port=2 actions=output:1"')
     net.start()
     dumpNodeConnections(net.hosts)
+    # add flow rules
+    run('sudo ovs-ofctl add-flow s1 in_port=1,actions=output:2,3')
+    run('sudo ovs-ofctl add-flow s2 in_port=2,actions=output:3')
+    run('sudo ovs-ofctl add-flow s3 in_port=3,actions=output:1,2')
     h1, h2 = net.getNodeByName('h1','h2')
     net.ping([h1,h2])
     net.stop()

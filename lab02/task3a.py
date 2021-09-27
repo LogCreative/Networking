@@ -38,8 +38,8 @@ def pingTest():
     net = Mininet(topo=topo,link=TCLink,autoStaticArp=True)
     net.start()
     dumpNodeConnections(net.hosts)
-    h1, h2 = net.getNodeByName('h1','h2')
-    net.ping([h2, h1])
+    # h1, h2 = net.getNodeByName('h1','h2')
+    # net.ping([h2, h1])
     CLI(net)            # debug interface
     net.stop()
     

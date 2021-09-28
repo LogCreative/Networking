@@ -1,0 +1,39 @@
+
+% Common Header for Artificial Intelligence class.
+% Compile through etex to cache the header.
+% Recipe: recompile header in VS Code
+
+\documentclass[UTF8]{ctexart}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\usepackage[fast]{colorist}
+\UseLanguage{CN}
+\tcbset{shield externalize}
+
+\makeatletter
+\def\@maketitle{
+    \raggedright
+    {\color{maintheme}
+    {\Large\bfseries\@title\par}
+    计算机网络 CS339\par
+    }
+    \@author\par\vspace{-1pc}
+    \@date
+}
+\makeatother
+
+\author{李子龙 518070910095}
+
+\begin{document}
+    \title{Lab 1: Learn Mininet}
+    \maketitle
+    \tableofcontents
+    \clearpage
+    \section{第一节}
+    \begin{definition}
+        1234
+    \end{definition}
+\end{document}

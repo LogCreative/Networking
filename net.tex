@@ -1,39 +1,183 @@
 
-% Common Header for Artificial Intelligence class.
+% Common Header for Computer Networking class.
 % Compile through etex to cache the header.
 % Recipe: recompile header in VS Code
 
+% Credit to: colorist package
+
 \documentclass[UTF8]{ctexart}
 
+\usepackage[heightrounded]{geometry}
+\geometry{
+    total={47em,66em},
+    hmarginratio=1:1,
+    vmarginratio=1:1,
+    footnotesep=2em plus 2pt minus 2pt,
+}
+
 \usepackage{tikz}
+\usetikzlibrary{external}
 \usepackage{pgfplots}
 \pgfplotsset{compat=newest}
 
-\usepackage[fast]{colorist}
-\UseLanguage{CN}
-\tcbset{shield externalize}
+\definecolor{maintheme}{RGB}{70,130,180}
+\definecolor{forestgreen}{RGB}{21,122,81}
+\definecolor{lightorange}{RGB}{255,185,88}
+
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+
+\fancypagestyle{fancy}{
+    \fancyhf{}
+    \if@twoside
+        \fancyfoot[RO]{\sffamily\textcolor{maintheme}{\small\lastrightmark}%
+            \rlap{~~~~\textcolor{maintheme}{\textbf{\thepage}}}}
+        \fancyfoot[LE]{\leavevmode\sffamily\llap{\textcolor{black!75!white}{\textbf{\thepage}}%
+            ~~~~}%
+            \textcolor{maintheme}{\small\lastleftmark}}
+    \else
+        \fancyfoot[R]{\sffamily\textcolor{maintheme}{\small\lastrightmark}%
+            \rlap{~~~~\textcolor{maintheme}{\textbf{\thepage}}}}
+    \fi
+    \renewcommand{\headrulewidth}{0pt}
+}
+\pagestyle{fancy}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \if@twoside
+        \fancyfoot[RO]{%
+            \sffamily~\rlap{~~~~\textcolor{maintheme}{\textbf{\thepage}}}}
+        \fancyfoot[LE]{\leavevmode\sffamily\llap{\textcolor{black!75!white}{\textbf{\thepage}}%
+            ~~~}}
+    \else
+        \fancyfoot[R]{%
+            ~\rlap{~~~~\textcolor{maintheme}{\textbf{\thepage}}}}
+    \fi
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+\usepackage[explicit,newparttoc]{titlesec}
+\usepackage[normalem]{ulem}
+
+%% Part
+\titleformat{\part}[display]
+{%
+\partfont\filleft}
+{\partstring}
+{.3em}
+{\fontsize{16}{0}\selectfont\MakeUppercase{#1}}
+\titleformat{name=\part,numberless}[display]
+{% \phantomsection\addcontentsline{toc}{part}{#1}%
+\partfont\filleft}
+{\phantom{\MakeUppercase{\partname}}}
+{.3em}
+{\fontsize{16}{0}\selectfont\MakeUppercase{#1}}
+%% Text after part
+\newcommand{\parttext}[1]{%
+\begin{flushright}%
+    \begin{minipage}{0.833\textwidth}%
+        \color{black!80!white}\raggedleft#1%
+    \end{minipage}%
+\end{flushright}%
+}
+
+%% Section
+\titleformat{\section}
+{\color{maintheme}\bfseries\large}
+{\thesection}{.75em}{\scshape #1}
+% [{\titlerule[.75pt]}]
+
+%% Subsection
+\titleformat{\subsection}
+{\bfseries}{\thesubsection}{.75em}
+{\scshape #1}
+
+\usepackage{titletoc}
+\titlecontents{part}
+    [0em]
+    {\addvspace{1.5pc}\large\filcenter\sffamily\conditionalbfseries}
+    {\textcolor{maintheme}{\bfseries\thecontentslabel}\nopagebreak\\\nopagebreak\uppercase}
+    {}
+    {} % without page number
+    [\addvspace{.5pc}]
+
+    \titlecontents{section}
+    [2em] % i.e., 0em (part) + 2em
+    {\addvspace{.3pc}\normalfont\color{maintheme}\sffamily}
+    {\contentslabel{1.75em}}
+    {\hspace*{-1.75em}}
+    {\titlerule*[10pt]{\parbox{2pt}{\textcolor{black!15!white}{.}}}\color{maintheme}\contentspage}
+\titlecontents{subsection}
+    [4.5em] % i.e., 2em (section) + 2.5em
+    {\addvspace{.15pc}\normalfont\sffamily}
+    {\contentslabel{2.15em}}
+    {\hspace*{-2.15em}}
+    {\titlerule*[10pt]{\parbox{2pt}{\textcolor{black!15!white}{.}}}\color{black!45!white}\contentspage}
+\titlecontents{subsubsection}
+    [7.75em] % i.e., 5em (subsection) + 3.25em
+    {\normalfont\sffamily}
+    {\contentslabel{2.75em}}
+    {\hspace*{-2.75em}}
+    {\titlerule*[10pt]{\parbox{2pt}{\textcolor{black!15!white}{.}}}\color{black!45!white}\contentspage}
 
 \makeatletter
+\if@twoside
+    \renewcommand*{\sectionmark}[1]{\markboth{\textsc{#1}}{}}
+\else
+    \renewcommand*{\sectionmark}[1]{\markboth{\textsc{#1}}{\textsc{#1}}}
+\fi
 \def\@maketitle{
     \raggedright
     {\color{maintheme}
     {\Large\bfseries\@title\par}
-    计算机网络 CS339\par
+    计算机网络 CS339\par\bigskip
     }
-    \@author\par\vspace{-1pc}
+    \@author\par
     \@date
 }
 \makeatother
 
+\usepackage{listings}
+\definecolor{grey}{rgb}{0.8,0.8,0.8}
+\definecolor{darkgreen}{rgb}{0,0.3,0}
+\definecolor{darkblue}{rgb}{0,0,0.3}
+\lstset{%
+    language=python,
+    numbers=left, %行号
+    numberstyle=\footnotesize\color{grey},
+    showstringspaces=false,
+    showspaces=false,%
+    tabsize=4,%
+    frame=lines,%
+    basicstyle={\ttfamily},%
+    keywordstyle=\color{blue!80!black}\bfseries,%
+    identifierstyle=,%
+    commentstyle=\color{green!50!blue}\itshape,%
+    stringstyle=\color{green!50!black},%
+    rulesepcolor=\color{gray!20!white},
+    breaklines,
+    columns=flexible,
+    extendedchars=false,
+    lineskip=-1pt,
+    %mathescape=true,
+}
+\providecommand{\code}[2][]{\lstinputlisting[caption=\href{run:#2}{\ttfamily #2},#1]{#2}}
+
+\usepackage{graphicx}
+\graphicspath{{img/}}
+
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{bookmark}
+
 \author{李子龙 518070910095}
 
 \begin{document}
-    \title{Lab 1: Learn Mininet}
+    \title{Learn Mininet}
     \maketitle
     \tableofcontents
     \clearpage
     \section{第一节}
-    \begin{definition}
-        1234
-    \end{definition}
+    \code{lab02/task1.py}
 \end{document}

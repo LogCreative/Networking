@@ -5,3 +5,6 @@
 *.synctex.gz
 *.fmt
 *.toc
+*.preview*
+cache/
+*.auxlock

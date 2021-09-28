@@ -1,10 +1,140 @@
 %&"../net"
-
+\endofdump
+\tikzexternalize[prefix=cache/]{lab02}
 \begin{document}
-    \title{Lab 2: Learn Mininet}
-    \maketitle
+\title{Lab 2: Learn Mininet}
+\maketitle
+\tableofcontents
 
-    \section{第一题}
+\section{第一题}
+\subsection{题目}
 
-    \code{task1.py}
+Simulate the following topology in Mininet. Set the link bandwidth for (s1,s2) and (s1,s3) as 10Mbps. Use Iperf to test the TCP throughput between every host pair.
+
+\begin{figure}[h]
+    \centering
+    \input{fig/task1topo.tex}
+\end{figure}
+
+第一题限制了交换机之间的带宽为 10 Mbps。
+
+\subsection{源代码}
+
+\code{task1.py}
+
+\subsection{测试结果}
+
+\begin{figure}[h]
+    \centering
+    \begin{multicols}{2}
+    \includegraphics[width=\linewidth]{task1}
+
+    \pgfplotstabletypeset[columns/Pair/.style={string type}]{fig/task2result.dat}
+    \begin{tikzpicture}
+        \begin{axis}[ymin={0},
+        ylabel={TCP throughput (Mbps)},
+        xlabel={host pair},
+        ymax={10},
+        symbolic x coords={h1-h2,h1-h3,h2-h3}, xtick=data,
+        ybar,]
+         \addplot+ [] table[x=Pair] {fig/task1result.dat};
+        \end{axis}
+        \end{tikzpicture}        
+    \end{multicols}
+\end{figure}
+
+所有的对的吞吐量都被降低到了 10 Mbps 以下。
+
+\section{第二题}
+
+\subsection{题目}
+
+Now let us set the packet loss rate of the link (s1,s2) and (s1,s3) as 5\%. Use Iperf to test the TCP throughput again.
+
+\begin{figure}[h]
+    \centering
+    \input{fig/task2topo.tex}
+\end{figure}
+
+交换机之间的带宽限制为 10 Mbps，丢包率为 5\%。
+
+\subsection{源代码变更}
+
+\code[firstline=23,lastline=25,firstnumber=23]{task2.py}
+
+\subsection{测试结果}
+
+\begin{figure}[h]
+    \centering
+    \begin{multicols}{2}
+    \includegraphics[width=\linewidth]{task2}
+
+    \pgfplotstabletypeset[columns/Pair/.style={string type}]{fig/task1result.dat}
+    \begin{tikzpicture}
+        \begin{axis}[ymin={0},
+        ylabel={TCP throughput (Mbps)},
+        xlabel={host pair},
+        ymax={10},
+        symbolic x coords={h1-h2,h1-h3,h2-h3}, xtick=data,
+        ybar,]
+        \addplot+ [] table[x=Pair] {fig/task2result.dat};
+        \end{axis}
+        \end{tikzpicture}        
+    \end{multicols}
+\end{figure}
+
+所有对的吞吐量大幅下降，其中 h2 和 h3 之间的吞吐量最低，因为会经过两个丢包链路，所以会丢失更多的包。
+
+\section{第三题}
+
+\subsection{题目}
+
+Let us add another link between s2 and s3. 
+Try pinging h2 from h1. What would happen?
+How would you solve the problem? 
+(Hint: Use ovs-ofctl command to add flow rules. )
+
+\begin{figure}[h]
+    \centering
+    \input{fig/task3topo.tex}
+\end{figure}
+
+\subsection{源代码变更（一）}
+
+\code[firstline=29,firstnumber=29]{task3a.py}
+
+\subsection{测试结果（一）}
+
+\begin{figure}[h]
+    \centering
+    \begin{multicols}{2}
+        \includegraphics[width=\linewidth]{task3adump}
+        \input{fig/task3port.tex}
+    \end{multicols}
+\end{figure}
+
+测试显示 h1 到 h2 的包全部丢失。图中还显示了流表信息。右图展示了一个从 h1 发出的包会导致端口间转发循环的一种情况，在这种默认的配置下，会导致找不到到达 h2 的通路。
+
+\subsection{源代码变更（二）}
+
+\code[firstline=29,firstnumber=29]{task3b.py}
+
+\subsection{测试结果（二）}
+
+\begin{figure}[h]
+    \centering
+    \begin{multicols}{2}
+        \includegraphics[width=\linewidth]{task3b}
+        \input{fig/task3flowport.tex}
+    \end{multicols}
+\end{figure}
+
+通过手动添加流表规则，
+\begin{quotation}
+    \noindent s1p1$\rightarrow$s1p2,s1p3\\
+    s2p2$\rightarrow$s2p3\\
+    s3p3$\rightarrow$s3p1,s3p2
+\end{quotation}
+就能够实现 h1 到 h2 的通信。
+
 \end{document}

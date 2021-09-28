@@ -15,10 +15,18 @@
     footnotesep=2em plus 2pt minus 2pt,
 }
 
+\usepackage{array,booktabs}
 \usepackage{tikz}
 \usetikzlibrary{external}
 \usepackage{pgfplots}
 \pgfplotsset{compat=newest}
+\usepackage{pgfplotstable}
+\pgfplotstableset{
+    every head row/.style={
+    before row=\toprule,after row=\midrule},
+    every last row/.style={
+    after row=\bottomrule},
+}
 
 \definecolor{maintheme}{RGB}{70,130,180}
 \definecolor{forestgreen}{RGB}{21,122,81}
@@ -170,6 +178,8 @@
 
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
 \usepackage{bookmark}
+
+\usepackage{multicol}
 
 \author{李子龙 518070910095}
 

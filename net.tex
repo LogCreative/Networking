@@ -6,14 +6,12 @@
 % Credit to: colorist package
 
 \documentclass[UTF8]{ctexart}
+\usepackage[T1]{fontenc}
+\usepackage{beramono}
+\usepackage{mathpazo}
 
 \usepackage[heightrounded]{geometry}
-\geometry{
-    total={47em,66em},
-    hmarginratio=1:1,
-    vmarginratio=1:1,
-    footnotesep=2em plus 2pt minus 2pt,
-}
+\geometry{left=3cm,right=3cm,top=4cm,bottom=4cm}
 
 \usepackage{array,booktabs}
 \usepackage{tikz}
@@ -153,30 +151,37 @@
 \definecolor{darkblue}{rgb}{0,0,0.3}
 \lstset{%
     language=python,
-    numbers=left, %行号
-    numberstyle=\footnotesize\color{grey},
+    % columns=flexible,
+    inputencoding=utf8,
+    basicstyle=\small\ttfamily,
+    numberstyle=\scriptsize\ttfamily\color{gray},
     showstringspaces=false,
     showspaces=false,%
-    tabsize=4,%
-    frame=lines,%
-    basicstyle={\ttfamily},%
-    keywordstyle=\color{blue!80!black}\bfseries,%
-    identifierstyle=,%
-    commentstyle=\color{green!50!blue}\itshape,%
-    stringstyle=\color{green!50!black},%
-    rulesepcolor=\color{gray!20!white},
-    breaklines,
-    columns=flexible,
-    extendedchars=false,
+    tabsize=4,
+    numbers=left,
+    framexleftmargin=8mm,
+    xleftmargin=8mm,
+    keepspaces=true,
+    frame=lines,
+    framerule=1pt,
+    rulecolor=\color{green!50!black},
+    backgroundcolor=\color{green!5},
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red!75},
+    keywordstyle=\color{blue!80!black},
     lineskip=-1pt,
-    %mathescape=true,
+    breaklines,
+    extendedchars=false
 }
 \providecommand{\code}[2][]{\lstinputlisting[caption=\href{run:#2}{\ttfamily #2},#1]{#2}}
+
+\providecommand{\codeseg}[4][]{\lstinputlisting[caption=\href{run:#2}{\ttfamily #2},firstline=#3,firstnumber=#3,lastline=#4,#1]{#2}}
+
 
 \usepackage{graphicx}
 \graphicspath{{img/}}
 
-\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage[colorlinks,linkcolor=maintheme]{hyperref}
 \usepackage{bookmark}
 
 \usepackage{multicol}

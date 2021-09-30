@@ -3,6 +3,29 @@
 % https://shimowendang.com/docs/wGQPHvHrcTTDyChh/read
 
 \begin{document}
-    \title{Socket Programming}
-    \maketitle
+\title{Socket Programming}
+\maketitle
+\section{要求}
+You will implement a simple file share application using TCP Socket APIs. 
+
+You can use any programming language. You need to submit your code together with a report. The report should contain how to run your program and some evaluation results.
+
+\begin{enumerate}
+    \item Implement C/S model: 
+    \begin{enumerate}
+        \item Server listens to a given port (>1024, e.g. 2680)
+        \item Multiple clients request the same file from the server
+        \item Each client save the file to its local directory.
+    \end{enumerate}
+    \item Use Mininet to compare the overall file downloading time. Study how the number of downloading time changes with respect to the number of peers. You need to create the following star topology in Mininet. You can use one host as a server, and the other hosts as peers requesting files.
+\end{enumerate}
+
+Additional Points:
+
+\begin{enumerate}
+    \item Implement P2P model: Each peer downloads part of the file from the server, and then distributes it to all the other peers.
+
+    \item Use Mininet to compare the overall file downloading time under P2P model.
+\end{enumerate}
+
 \end{document}

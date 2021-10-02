@@ -22,7 +22,7 @@ int main()
 	ipOfServer.sin_addr.s_addr = htonl(INADDR_ANY);
 	ipOfServer.sin_port = htons(2680); 		// this is the port number of running server
 	bind(clintListn, (struct sockaddr*)&ipOfServer , sizeof(ipOfServer));
-	listen(clintListn , 20);
+	listen(clintListn , 1);
  
 	while(1)
 	{

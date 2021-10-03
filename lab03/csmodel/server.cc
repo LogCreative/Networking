@@ -50,7 +50,7 @@ int main()
 	fclose(f);
 
 	f = fopen("file_send.txt","wb");
-    fwrite(dataSending,sizeof(char),20480,f);
+    fwrite(dataSending,sizeof(char),fsize,f);
     fclose(f);
 
 	while(1)

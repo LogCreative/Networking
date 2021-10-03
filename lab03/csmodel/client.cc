@@ -8,11 +8,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
- 
-int main()
+
+#define MAXLINE 102400
+
+int main(int argc, char* argv[])
 {
     int CreateSocket = 0,n = 0;
-    char dataReceived[20480];
+    char dataReceived[MAXLINE];
     struct sockaddr_in ipOfServer;
  
     memset(dataReceived, 1 ,sizeof(dataReceived));
@@ -25,7 +27,12 @@ int main()
  
     ipOfServer.sin_family = AF_INET;
     ipOfServer.sin_port = htons(2680);
-    ipOfServer.sin_addr.s_addr = inet_addr("127.0.0.1");
+    if(argc==1){
+        fprintf(stderr,"No server ip assigned. Use 127.0.0.1 as default.\n");
+        ipOfServer.sin_addr.s_addr = inet_addr("127.0.0.1");
+    } else {
+        ipOfServer.sin_addr.s_addr = inet_addr(argv[1]);
+    }
  
     if(connect(CreateSocket, (struct sockaddr *)&ipOfServer, sizeof(ipOfServer))<0)
     {
@@ -43,7 +50,7 @@ int main()
     }
     
     FILE* f = fopen("file_receive.txt","wb");
-    fwrite(dataReceived,sizeof(char),20480,f);
+    fwrite(dataReceived,sizeof(char),MAXLINE,f);
     fclose(f);
 
     if( n < 0)

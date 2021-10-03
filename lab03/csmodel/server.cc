@@ -10,19 +10,14 @@
 #include <netinet/in.h> //contains constants and structures needed for internet domain addresses
 #include <pthread.h>
 
+char* dataSending; // Actually this is called packet in Network Communication, which contain data and send through.
+int fsize;
+
 void* send_thread(void* conn_void_ptr){
 	int clintConnt = *((int*)conn_void_ptr);
 	pthread_detach(pthread_self());
 	free(conn_void_ptr);
-	
-	char dataSending[1025]; // Actually this is called packet in Network Communication, which contain data and send through.
-	memset(dataSending, '0', sizeof(dataSending));
-
-	time_t clock;
-	clock = time(NULL);
-	snprintf(dataSending, sizeof(dataSending), "%.24s\r\n", ctime(&clock)); // Printing successful message
-	write(clintConnt, dataSending, strlen(dataSending));
-
+	write(clintConnt, dataSending, sizeof(char)*fsize);
 	close(clintConnt);
 }
 
@@ -40,6 +35,23 @@ int main()
  
 	int* clintConnt;
 	pthread_t th;
+
+	FILE* f;
+	if((f = fopen("file.txt","rb"))==NULL){
+		fprintf(stderr, "Can't open file file.txt.\n");
+		return -1;
+	}
+	fseek(f,0,SEEK_END);
+	fsize = ftell(f);
+	fseek(f,0,SEEK_SET);
+	dataSending = (char*)malloc(sizeof(char)*fsize);
+	printf("%d\n",fsize);
+	fread(dataSending, sizeof(char), fsize, f);
+	fclose(f);
+
+	f = fopen("file_send.txt","wb");
+    fwrite(dataSending,sizeof(char),20480,f);
+    fclose(f);
 
 	while(1)
 	{

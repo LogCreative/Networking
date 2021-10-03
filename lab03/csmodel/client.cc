@@ -12,10 +12,10 @@
 int main()
 {
     int CreateSocket = 0,n = 0;
-    char dataReceived[1024];
+    char dataReceived[20480];
     struct sockaddr_in ipOfServer;
  
-    memset(dataReceived, '0' ,sizeof(dataReceived));
+    memset(dataReceived, 1 ,sizeof(dataReceived));
  
     if((CreateSocket = socket(AF_INET, SOCK_STREAM, 0))< 0)
     {
@@ -33,17 +33,19 @@ int main()
         return 1;
     }
  
-    while((n = read(CreateSocket, dataReceived, sizeof(dataReceived)-1)) > 0)
+    while((n = read(CreateSocket, dataReceived, sizeof(dataReceived))) > 0)
     {
         dataReceived[n] = 0;
         if(fputs(dataReceived, stdout) == EOF)
         {
             printf("\nStandard output error");
         }
- 
-        printf("\n");
     }
- 
+    
+    FILE* f = fopen("file_receive.txt","wb");
+    fwrite(dataReceived,sizeof(char),20480,f);
+    fclose(f);
+
     if( n < 0)
     {
         printf("Standard input error \n");

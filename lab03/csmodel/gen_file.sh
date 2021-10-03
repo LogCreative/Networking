@@ -1,3 +1,3 @@
 #!/bin/bash
 
-dd if=/dev/zero of=file.txt count=1024 bs=1024
+dd if=/dev/urandom of=file.txt bs=2048 count=10

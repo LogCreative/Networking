@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <time.h> //contains various functions for manipulating date and time
 
 #define MAXLINE 102400
 
@@ -48,8 +49,14 @@ int main(int argc, char* argv[])
             printf("\nStandard output error");
         }
     }
-    
-    FILE* f = fopen("file_receive.txt","wb");
+
+    char filename[80];
+    if (argc == 3)
+        sprintf(filename, "file_receive_%s.txt",argv[2]);   
+    else
+        sprintf(filename, "file_receive.txt");
+
+    FILE* f = fopen(filename,"wb");
     fwrite(dataReceived,sizeof(char),MAXLINE,f);
     fclose(f);
 

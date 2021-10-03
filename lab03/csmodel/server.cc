@@ -2,7 +2,6 @@
 #include <stdlib.h> // this includes functions regarding memory allocation
 #include <string.h> // contains string functions
 #include <errno.h> //It defines macros for reporting and retrieving error conditions through error codes
-#include <time.h> //contains various functions for manipulating date and time
 #include <unistd.h> //contains various constants
 #include <sys/types.h> //contains a number of basic derived types that should be used whenever appropriate
 #include <arpa/inet.h> // defines in_addr structure

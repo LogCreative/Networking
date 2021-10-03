@@ -5,7 +5,7 @@ from mininet.link import TCLink
 from mininet.topo import LinearTopo, Topo
 from mininet.net import Mininet
 from mininet.log import lg, info
-from mininet.util import dumpNodeConnections,irange
+from mininet.util import dumpNodeConnections,irange, run
 from mininet.cli import CLI
 
 class CentralizedTopo(Topo):
@@ -29,9 +29,24 @@ def FileTransfer(hostnumber=2):
     net = Mininet(topo=topo, link=TCLink, autoStaticArp=False)
     net.start()
     # Test connectivity.
-    # Currently, s1 could not pass to h1, h2.
-    for i in range(hostnumber):
-        net.ping([net.switches[0],net.hosts[i]])
+    # Currently, s1 could not pass to h1, h2. SINCE IT IS A ROUTER!
+    # for i in range(hostnumber):
+    #     net.ping([net.switches[0],net.hosts[i]])
+    net.pingAll()
+
+    # clean the files.
+    run("rm -rf file_receive_*")
+
+    # Place the server on h1.
+    net.hosts[0].cmdPrint("./server","&")
+    
+    # All other host request the file from h1.
+    for i in range(1,hostnumber):
+        host = net.hosts[i]
+        host.cmdPrint("./client",net.hosts[0].IP(),host.name,"&")
+        # # check the difference.
+        # run("diff file.txt file_receive_"+host.name+".txt")
+
     CLI(net)
     net.stop()
 

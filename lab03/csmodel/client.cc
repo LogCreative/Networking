@@ -53,12 +53,26 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    clock_t start,finish;
+
+    start = clock();
+
     for(int i = 0; i < MAXLINE/1024; ++i)
         read(CreateSocket, dataReceived + (i*1024) , 1024);
 
     FILE* f = fopen(filename,"wb");
     fwrite(dataReceived,sizeof(char),MAXLINE,f);
     fclose(f);
+
+    finish = clock();
+
+    FILE* rf = fopen("result_c.dat","a");
+    // marked as B/s
+    double speed = MAXLINE/((double)(finish-start)/CLOCKS_PER_SEC);
+    if (argc==4)
+        fprintf(rf,"%s\t%.2f\n",argv[3],speed);
+    else fprintf(rf,"\t%.2f\n",speed);
+    fclose(rf);
 
     if( n < 0)
     {

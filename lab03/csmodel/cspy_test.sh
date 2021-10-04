@@ -1,6 +1,7 @@
 # !/bin/bash
 
 rm -rf file*
+rm -rf result_py.dat
 dd if=/dev/zero of=file.txt bs=1024 count=1024
 python server.py &
 python client.py 1048576

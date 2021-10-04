@@ -35,14 +35,15 @@ def FileTransfer(hostnumber=2):
     net.pingAll()
 
     # clean the files.
-    run("rm -rf file_receive_*")
+    run("sudo rm -rf file_receive_*")
+    run("sudo rm -rf result_*")
 
     # Place the server on h1.
     net.hosts[0].cmdPrint("python server.py","&")
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint("python client.py",net.hosts[0].IP(),net.hosts[i].name,"&")
+        net.hosts[i].cmdPrint("python client.py",1048576,net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
     

@@ -26,5 +26,6 @@ print('Ready to send.')
 
 while True:
     connectionSocket, addr = serverSocket.accept()
+    print(addr)
     sth = sendthread(connectionSocket)
     sth.start()

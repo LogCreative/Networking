@@ -1,7 +1,7 @@
 from socket import *
 import threading
 
-serverPort = 2680
+serverPort = 2683
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
 serverSocket.listen(5)

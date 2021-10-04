@@ -1,24 +1,25 @@
 from socket import *
 from sys import argv
 
-if len(argv)==1:
-    serverName = "127.0.0.1"
-else:
-    serverName = argv[1]
-serverPort = 2680
+MAXLINE = 1024
+serverName = "127.0.0.1"
+filename = "file_receive.txt"
+
+if len(argv)>=2:
+    MAXLINE = int(argv[1])
+if len(argv)>=3:
+    serverName = int(argv[2])
+if len(argv)>=4:
+    filename = "file_receive_" + argv[3] + ".txt"
+
+serverPort = 2683
 clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect((serverName, serverPort))
 
-receivedFileContent = ""
-for i in range(100):
-    receivedFileContent = receivedFileContent + clientSocket.recv(1024).decode()
-
-if len(argv)==3:
-    filename = "file_receive_" + argv[2] + ".txt"
-else:
-    filename = "file_receive.txt"
+print(MAXLINE)
 
 with open(filename,"wb") as f:
-    f.write(receivedFileContent)
+    for i in range(MAXLINE/1024):
+        f.write(clientSocket.recv(1024).decode())
 
 clientSocket.close()

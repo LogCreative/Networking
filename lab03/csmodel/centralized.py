@@ -38,11 +38,11 @@ def FileTransfer(hostnumber=2):
     run("rm -rf file_receive_*")
 
     # Place the server on h1.
-    net.hosts[0].cmdPrint("./server","&")
+    net.hosts[0].cmdPrint("python server.py","&")
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint("./client",net.hosts[0].IP(),net.hosts[i].name,"&")
+        net.hosts[i].cmdPrint("python client.py",net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
     

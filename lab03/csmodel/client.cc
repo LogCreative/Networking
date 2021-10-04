@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <time.h> //contains various functions for manipulating date and time
 
-#define MAXLINE 1024
+#define MAXLINE 102400
 
 int main(int argc, char* argv[])
 {
@@ -40,16 +40,10 @@ int main(int argc, char* argv[])
         printf("Connection failed due to port and ip problems\n");
         return 1;
     }
- 
-    while((n = read(CreateSocket, dataReceived, sizeof(dataReceived))) > 0)
-    {
-        dataReceived[n] = 0;
-        if(fputs(dataReceived, stdout) == EOF)
-        {
-            printf("\nStandard output error");
-        }
-    }
 
+    for(int i = 0; i < MAXLINE/1024; ++i)
+        read(CreateSocket, dataReceived + (i*1024) , 1024);
+    
     char filename[80];
     if (argc == 3)
         sprintf(filename, "file_receive_%s.txt",argv[2]);   

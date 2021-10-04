@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <time.h> //contains various functions for manipulating date and time
 
-#define MAXLINE 102400
+#define MAXLINE 1024
 
 int main(int argc, char* argv[])
 {

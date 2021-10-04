@@ -10,4 +10,4 @@ cache/
 *.auxlock
 *.zip
 .fuse_*
-file_*
+file*

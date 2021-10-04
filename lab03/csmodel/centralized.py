@@ -42,12 +42,13 @@ def FileTransfer(hostnumber=2):
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        host = net.hosts[i]
-        host.cmdPrint("./client",net.hosts[0].IP(),host.name,"&")
-        # # check the difference.
-        # run("diff file.txt file_receive_"+host.name+".txt")
+        net.hosts[i].cmdPrint("./client",net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
+    
+    # check the difference.
+    for i in range(1,hostnumber):
+        run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
     net.stop()
 
 if __name__=="__main__":

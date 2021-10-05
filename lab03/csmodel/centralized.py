@@ -1,6 +1,9 @@
 # To construct a centralized structure
 # for C/S model.
 
+import os, glob
+from sys import argv
+from time import sleep
 from mininet.link import TCLink
 from mininet.topo import LinearTopo, Topo
 from mininet.net import Mininet
@@ -24,6 +27,22 @@ class CentralizedTopo(Topo):
 def FileTransfer(hostnumber=2):
     "Make file transfer between switch and hosts simutanously."
     
+    servercmd = "python server.py"
+    clientcmd = "python client.py"
+    resultfile = "result_py.dat"
+    avgresfile = "avgres_py.dat"
+    if len(argv)>=2:
+        if(argv[1]=="c"):
+            servercmd = "./server"
+            clientcmd = "./client"
+            resultfile = "result_c.dat"
+            avgresfile = "avgres_c.dat"
+
+    dirty = False
+    if len(argv)>=3:
+        if(argv[2]=="--dirty"):
+            dirty = True
+
     topo = CentralizedTopo(hostnumber)
     # topo = LinearTopo(1,hostnumber) # The same.
     net = Mininet(topo=topo, link=TCLink, autoStaticArp=False)
@@ -32,24 +51,40 @@ def FileTransfer(hostnumber=2):
     # Currently, s1 could not pass to h1, h2. SINCE IT IS A ROUTER!
     # for i in range(hostnumber):
     #     net.ping([net.switches[0],net.hosts[i]])
-    net.pingAll()
+    if not dirty:
+        net.pingAll()
 
     # clean the files.
-    run("sudo rm -rf file_receive_*")
-    run("sudo rm -rf result_*")
+    for file_receive in glob.glob("file_receive*"):
+        os.remove(file_receive)
 
     # Place the server on h1.
-    net.hosts[0].cmdPrint("python server.py","&")
+    net.hosts[0].cmdPrint(servercmd,"&")
+    
+    sleep(2)
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint("python client.py",1048576,net.hosts[0].IP(),net.hosts[i].name,"&")
+        net.hosts[i].cmdPrint(clientcmd,10485760,net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
     
     # check the difference.
-    for i in range(1,hostnumber):
-        run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
+    if not dirty:
+        for i in range(1,hostnumber):
+            run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
+
+    results = []
+    with open(resultfile,"r") as rf:
+        resultlines = rf.read().splitlines()
+        for i in range(1,len(resultlines)):
+            results.append(float(resultlines[i].split('\t')[1]))
+    avg = sum(results)/len(results)
+    print("Average(B/s): "+str(avg))
+    print("Avaliable: " + str(len(results)) +  "/" + str(hostnumber-1) + "(" + str(int(len(results)*100/(hostnumber-1))) + "%)")
+    with open(avgresfile,"a") as af:
+        af.write(str(hostnumber-1)+"\t"+str(avg)+"\n")
+
     net.stop()
 
 if __name__=="__main__":

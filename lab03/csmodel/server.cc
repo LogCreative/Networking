@@ -52,6 +52,10 @@ int main()
     fwrite(dataSending,sizeof(char),fsize,f);
     fclose(f);
 
+	f = fopen("result_c.dat","w");
+	fprintf(f,"Host\tSpeed(B/s)\n");
+	fclose(f);
+
 	while(1)
 	{
 		printf("\n\nHi,I am running server.Some Client hit me\n"); // whenever a request from client came. It will be processed here.

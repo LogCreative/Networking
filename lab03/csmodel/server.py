@@ -22,6 +22,8 @@ def sendout(connectionSocket):
 
 with open("file_send.txt","wb") as f:
     f.write(content)
+with open("result_py.dat","w") as rf:
+    rf.write("Host\tSpeed(B/s)\n")
 print('Ready to send.')
 
 while True:

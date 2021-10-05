@@ -37,6 +37,9 @@ int main(int argc, char* argv[])
         break;
     }
 
+    clock_t start,finish;
+    start = clock();
+
     int CreateSocket = 0,n = 0;
     char* dataReceived = (char*)malloc(MAXLINE*sizeof(char));
     memset(dataReceived, 1 ,sizeof(dataReceived));
@@ -53,10 +56,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    clock_t start,finish;
-
-    start = clock();
-
     for(int i = 0; i < MAXLINE/1024; ++i)
         read(CreateSocket, dataReceived + (i*1024) , 1024);
 
@@ -70,9 +69,10 @@ int main(int argc, char* argv[])
     // marked as B/s
     double speed = MAXLINE/((double)(finish-start)/CLOCKS_PER_SEC);
     if (argc==4)
-        fprintf(rf,"%s\t%.2f\n",argv[3],speed);
-    else fprintf(rf,"\t%.2f\n",speed);
+        fprintf(rf,"%s\t%f\n",argv[3],speed);
+    else fprintf(rf,"\t%f\n",speed);
     fclose(rf);
+    fprintf(stdout, "%f\n", speed);
 
     if( n < 0)
     {

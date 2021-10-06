@@ -118,12 +118,31 @@ You can use any programming language. You need to submit your code together with
 
 \code[language=c]{csmodel/client.cc}
 
-Additional Points:
+\section{P2P 模型}
+
+\subsection{P2P 模型要求}
 
 \begin{enumerate}
     \item Implement P2P model: Each peer downloads part of the file from the server, and then distributes it to all the other peers.
 
     \item Use Mininet to compare the overall file downloading time under P2P model.
-\end{enumerate}
+    
+    \item For peer-to-peer mode, you may want to design a tracker file first. The tracker file contains the following information:
+    
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        file chunk id & peer ip \\
+        \midrule
+        1 & 10.0.0.1\\
+        2 & 10.0.0.2\\
+        3 & 10.0.0.3\\
+        4 & 10.0.0.4\\
+        \bottomrule
+    \end{tabular}
+    \end{table}
 
+    Then, if a client wants piece 2, it will contact 10.0.0.2. If the peer with ip=10.0.0.2 does not have the piece yet, it will contact the server to download this piece first. 
+\end{enumerate}
 \end{document}

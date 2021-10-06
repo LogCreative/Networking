@@ -4,6 +4,7 @@
 import os, glob
 from sys import argv
 from time import sleep
+import math
 from mininet.link import TCLink
 from mininet.topo import LinearTopo, Topo
 from mininet.net import Mininet
@@ -31,12 +32,12 @@ def FileTransfer(hostnumber=2):
     clientcmd = "python client.py"
     resultfile = "result_py.dat"
     avgresfile = "avgres_py.dat"
-    if len(argv)>=2:
-        if(argv[1]=="c"):
-            servercmd = "./server"
-            clientcmd = "./client"
-            resultfile = "result_c.dat"
-            avgresfile = "avgres_c.dat"
+    # if len(argv)>=2:
+    #     if(argv[1]=="c"):
+    #         servercmd = "./server"
+    #         clientcmd = "./client"
+    #         resultfile = "result_c.dat"
+    #         avgresfile = "avgres_c.dat"
 
     dirty = False
     if len(argv)>=3:
@@ -55,16 +56,21 @@ def FileTransfer(hostnumber=2):
     for file_receive in glob.glob("file_receive*"):
         os.remove(file_receive)
 
+    # Generate tracker file
     fileSize = os.path.getsize("file.txt")
+    chunkSize = int(math.ceil(fileSize/(hostnumber-1)))
+    with open("tracker.dat","w") as tf:
+        for i in range(hostnumber-1):
+            tf.write(str(i)+"\t"+net.hosts[i+1].IP()+"\n")
 
     # Place the server on h1.
-    net.hosts[0].cmdPrint(servercmd,"&")
+    net.hosts[0].cmdPrint(servercmd,chunkSize,"&")
     
     sleep(2)
     
-    # All other host request the file from h1.
+    # All other host request files.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name,"&")
+        net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
     

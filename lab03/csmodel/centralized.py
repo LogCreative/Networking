@@ -80,7 +80,7 @@ def FileTransfer(hostnumber=2):
         for i in range(1,len(resultlines)):
             results.append(float(resultlines[i].split('\t')[1]))
     avg = sum(results)/len(results)
-    print("Average(B/s): "+str(avg))
+    print("Average: "+str(avg))
     print("Avaliable: " + str(len(results)) +  "/" + str(hostnumber-1) + "(" + str(int(len(results)*100/(hostnumber-1))) + "%)")
     with open(avgresfile,"a") as af:
         af.write(str(hostnumber-1)+"\t"+str(avg)+"\n")

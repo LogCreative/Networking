@@ -53,7 +53,7 @@ int main()
     fclose(f);
 
 	f = fopen("result_c.dat","w");
-	fprintf(f,"Host\tSpeed(B/s)\n");
+	fprintf(f,"Host\tTime\n");
 	fclose(f);
 
 	while(1)

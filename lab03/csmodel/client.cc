@@ -67,12 +67,12 @@ int main(int argc, char* argv[])
 
     FILE* rf = fopen("result_c.dat","a");
     // marked as B/s
-    double speed = MAXLINE/((double)(finish-start)/CLOCKS_PER_SEC);
+    double elapsed_time = (double)(finish-start)/CLOCKS_PER_SEC;
     if (argc==4)
-        fprintf(rf,"%s\t%f\n",argv[3],speed);
-    else fprintf(rf,"\t%f\n",speed);
+        fprintf(rf,"%s\t%f\n",argv[3],elapsed_time);
+    else fprintf(rf,"\t%f\n",elapsed_time);
     fclose(rf);
-    fprintf(stdout, "%f\n", speed);
+    fprintf(stdout, "%f\n", elapsed_time);
 
     if( n < 0)
     {

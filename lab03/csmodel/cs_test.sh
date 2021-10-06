@@ -9,8 +9,8 @@ g++ client.cc -o client
 ./server &
 sleep 1
 ./client 10485760
-xxd file.txt > file.hex
-xxd file_receive.txt > file_receive.hex
+# xxd file.txt > file.hex
+# xxd file_receive.txt > file_receive.hex
 # diff file.txt file_send.txt
-diff file.hex file_receive.hex
+# diff file.hex file_receive.hex
 exit

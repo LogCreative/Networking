@@ -4,7 +4,7 @@ import threading
 serverPort = 2683
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
-serverSocket.listen(5)
+serverSocket.listen(20)
 
 with open("file.txt","rb") as f:
     content = f.read()
@@ -23,7 +23,7 @@ def sendout(connectionSocket):
 with open("file_send.txt","wb") as f:
     f.write(content)
 with open("result_py.dat","w") as rf:
-    rf.write("Host\tSpeed(B/s)\n")
+    rf.write("Host\tTime\n")
 print('Ready to send.')
 
 while True:

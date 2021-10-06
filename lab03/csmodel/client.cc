@@ -66,7 +66,6 @@ int main(int argc, char* argv[])
     finish = clock();
 
     FILE* rf = fopen("result_c.dat","a");
-    // marked as B/s
     double elapsed_time = (double)(finish-start)/CLOCKS_PER_SEC;
     if (argc==4)
         fprintf(rf,"%s\t%f\n",argv[3],elapsed_time);

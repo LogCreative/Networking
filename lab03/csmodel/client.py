@@ -33,6 +33,5 @@ clientSocket.close()
 elapsed_time = END_TIME-START_TIME
 print(elapsed_time)
 
-# marked as B/s
 with open("result_py.dat","a") as rf:
     rf.write(hostname + "\t" + str(elapsed_time) + "\n")

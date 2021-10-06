@@ -48,9 +48,6 @@ def FileTransfer(hostnumber=2):
     net = Mininet(topo=topo, link=TCLink, autoStaticArp=False)
     net.start()
     # Test connectivity.
-    # Currently, s1 could not pass to h1, h2. SINCE IT IS A ROUTER!
-    # for i in range(hostnumber):
-    #     net.ping([net.switches[0],net.hosts[i]])
     if not dirty:
         net.pingAll()
 

@@ -9,7 +9,7 @@ from mininet.link import TCLink
 from mininet.topo import LinearTopo, Topo
 from mininet.net import Mininet
 from mininet.log import lg, info
-from mininet.util import dumpNodeConnections,irange, run
+from mininet.util import dumpNodeConnections,irange, quietRun, run
 from mininet.cli import CLI
 
 class CentralizedTopo(Topo):
@@ -29,7 +29,7 @@ def FileTransfer(hostnumber=2):
     "Make file transfer between switch and hosts simutanously."
     
     servercmd = "python server.py"
-    clientcmd = "python client.py"
+    clientcmd = "python peer.py"
     resultfile = "result_py.dat"
     avgresfile = "avgres_py.dat"
     # if len(argv)>=2:
@@ -63,6 +63,9 @@ def FileTransfer(hostnumber=2):
         for i in range(hostnumber-1):
             tf.write(str(i)+"\t"+net.hosts[i+1].IP()+"\n")
 
+    # Try to dump
+    dumpNodeConnections(net.hosts)
+
     # Place the server on h1.
     net.hosts[0].cmdPrint(servercmd,chunkSize,"&")
     
@@ -70,7 +73,10 @@ def FileTransfer(hostnumber=2):
     
     # All other host request files.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].name,"&")
+        if i == hostnumber - 1:
+            print(net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP()))
+        else:
+            net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP(),"&")
 
     CLI(net)
     
@@ -84,7 +90,7 @@ def FileTransfer(hostnumber=2):
         resultlines = rf.read().splitlines()
         for i in range(1,len(resultlines)):
             results.append(float(resultlines[i].split('\t')[1]))
-    avg = sum(results)/len(results)
+    avg = sum(results)/len(results) if not len(results) == 0 else -1
     print("Average: "+str(avg))
     print("Avaliable: " + str(len(results)) +  "/" + str(hostnumber-1) + "(" + str(int(len(results)*100/(hostnumber-1))) + "%)")
     with open(avgresfile,"a") as af:

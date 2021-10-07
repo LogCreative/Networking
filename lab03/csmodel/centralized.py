@@ -57,14 +57,19 @@ def FileTransfer(hostnumber=2):
 
     fileSize = os.path.getsize("file.txt")
 
+    dumpNodeConnections(net.hosts)
+
     # Place the server on h1.
-    net.hosts[0].cmdPrint(servercmd,"&")
+    print(net.hosts[0].cmdPrint(servercmd,"&"))
     
     sleep(2)
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name,"&")
+        if i == hostnumber - 1:
+            print(net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name))
+        else:
+            net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name,"&")
 
     CLI(net)
     

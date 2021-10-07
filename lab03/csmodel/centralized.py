@@ -1,3 +1,9 @@
+# python centralized.py [hostnumber] [py|c] [--dirty]
+
+# [hostnumber] is the number of hosts in the structure (including the server)
+# py will launch python script, while c will launch c version.
+# --dirty will pass all the checking
+
 # To construct a centralized structure
 # for C/S model.
 
@@ -31,16 +37,17 @@ def FileTransfer(hostnumber=2):
     clientcmd = "python client.py"
     resultfile = "result_py.dat"
     avgresfile = "avgres_py.dat"
-    if len(argv)>=2:
-        if(argv[1]=="c"):
+
+    if len(argv)>=3:
+        if(argv[2]=="c"):
             servercmd = "./server"
             clientcmd = "./client"
             resultfile = "result_c.dat"
             avgresfile = "avgres_c.dat"
 
     dirty = False
-    if len(argv)>=3:
-        if(argv[2]=="--dirty"):
+    if len(argv)>=4:
+        if(argv[3]=="--dirty"):
             dirty = True
 
     topo = CentralizedTopo(hostnumber)
@@ -62,27 +69,31 @@ def FileTransfer(hostnumber=2):
     # Place the server on h1.
     print(net.hosts[0].cmdPrint(servercmd,"&"))
     
+    # To make sure the client will contact the server.
     sleep(2)
     
     # All other host request the file from h1.
     for i in range(1,hostnumber):
-        if i == hostnumber - 1:
-            print(net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name))
-        else:
-            net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name,"&")
+        net.hosts[i].cmdPrint(clientcmd,fileSize,net.hosts[0].IP(),net.hosts[i].name,"" if i == hostnumber - 1 else "&")
 
-    CLI(net)
+    # CLI(net)
     
     # check the difference.
     if not dirty:
         for i in range(1,hostnumber):
             run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
 
-    results = []
-    with open(resultfile,"r") as rf:
-        resultlines = rf.read().splitlines()
-        for i in range(1,len(resultlines)):
-            results.append(float(resultlines[i].split('\t')[1]))
+    # Wait for all hosts complete.
+    complete = 0
+    while not complete == hostnumber:
+        results = []
+        with open(resultfile,"r") as rf:
+            resultlines = rf.read().splitlines()
+            complete = len(resultlines)
+            for i in range(1,len(resultlines)):
+                results.append(float(resultlines[i].split('\t')[1]))
+        sleep(10)
+
     avg = sum(results)/len(results)
     print("Average: "+str(avg))
     print("Avaliable: " + str(len(results)) +  "/" + str(hostnumber-1) + "(" + str(int(len(results)*100/(hostnumber-1))) + "%)")
@@ -93,5 +104,8 @@ def FileTransfer(hostnumber=2):
 
 if __name__=="__main__":
     lg.setLogLevel( 'info' )
-    hostnumber = input("Please input hostnumber:")
-    FileTransfer(int(hostnumber))
+    if len(argv)>=2:
+        hostnumber = int(argv[1])
+    else:    
+        hostnumber = int(input("Please input hostnumber:"))
+    FileTransfer(hostnumber)

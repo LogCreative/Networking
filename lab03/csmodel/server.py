@@ -1,3 +1,5 @@
+# python server.py [&]
+
 from socket import *
 import threading
 

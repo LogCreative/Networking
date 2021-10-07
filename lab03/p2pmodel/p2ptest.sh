@@ -3,6 +3,7 @@
 rm -rf file*
 rm -rf result_py.dat
 dd if=/dev/zero of=file.txt bs=1024 count=10240
+python centralized.py
 # python server.py &
 # sleep 1
 # python client.py 10485760

@@ -47,6 +47,7 @@ def DownContent(chunkNumber):
         content[chunkNumber] = fileChunk           # write to self content  
         # threadLock.release()
         trackers[chunkNumber][2] = True            # declare to be useable
+        print("Received Size from " + serverName + " :" + str(len(fileChunk)))
 
         clientSocket.close()
     else:
@@ -75,9 +76,17 @@ class ServiceThread(threading.Thread):
         receivePeerSocket = socket(AF_INET, SOCK_STREAM)
         receivePeerSocket.bind(('', receivePeerPort))
         receivePeerSocket.listen(20)
+        receivePeerSocket.settimeout(10)
 
         while True:
-            connectionSocket, addr = receivePeerSocket.accept()
+            try:
+                connectionSocket, addr = receivePeerSocket.accept()
+            except timeout:
+                if len(content)==len(trackers):
+                    # The transmission has been complete.
+                    break
+                else:
+                    continue
             chunkNumber = int(connectionSocket.recv(1024).decode())
             print(addr, chunkNumber)
             sth = SendThread(connectionSocket,chunkNumber)
@@ -88,6 +97,7 @@ def getContent(tracker):
     sendPeerSocket = socket(AF_INET, SOCK_STREAM)
     
     try:
+        time.sleep(0.5)
         sendPeerSocket.connect((tracker[1],sendPeerPort))
     except:
         print("- Retry connect to "+ tracker[1] + " after 3 sec.")
@@ -100,6 +110,7 @@ def getContent(tracker):
     receivedFileChunk = ""
     for i in range(chunkSize/1024):
         receivedFileChunk = receivedFileChunk + sendPeerSocket.recv(1024).decode()
+    print("Received Size from " + tracker[1] + " :" + str(len(receivedFileChunk)))
     # threadLock.acquire()
     content[tracker[0]] = receivedFileChunk           # write to self content  
     # threadLock.release()
@@ -122,6 +133,7 @@ class FetchingThread(threading.Thread):
             if not tracker[1] == hostName:
                 rth = ReceiveThread(tracker)
                 rth.start()
+                rths.append(rth)
         for rth in rths:
             rth.join()
 
@@ -144,8 +156,6 @@ for tracker in trackers:
         DownContent(tracker[0])
 
 # should be done with all file chunks, unless error occurred.
-print(len(content),len(trackers))
-
 with open(filename,"wb") as f:
     for i in range(len(content)):
         if i in content.keys():
@@ -160,8 +170,3 @@ print(elapsed_time)
 
 with open("result_py.dat","a") as rf:
     rf.write(hostname + "\t" + str(elapsed_time) + "\n")
-
-# Server wait for another 10 sec.
-# The file only pocessed by me.
-# time.sleep(10)
-# serth.join()

@@ -1,5 +1,5 @@
 # To construct a centralized structure
-# for C/S model.
+# for P2P model.
 
 import os, glob
 from sys import argv
@@ -73,17 +73,14 @@ def FileTransfer(hostnumber=2):
     
     # All other host request files.
     for i in range(1,hostnumber):
-        if i == hostnumber - 1:
-            print(net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP()))
-        else:
-            net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP(),"&")
-
+        net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP(),"" if i == hostnumber - 1 else "&")
+        
     CLI(net)
     
     # check the difference.
-    if not dirty:
-        for i in range(1,hostnumber):
-            run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
+    # if not dirty:
+    #     for i in range(1,hostnumber):
+    #         run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
 
     results = []
     with open(resultfile,"r") as rf:

@@ -32,25 +32,10 @@ def FileTransfer(hostnumber=2):
     clientcmd = "python peer.py"
     resultfile = "result_py.dat"
     avgresfile = "avgres_py.dat"
-    # if len(argv)>=2:
-    #     if(argv[1]=="c"):
-    #         servercmd = "./server"
-    #         clientcmd = "./client"
-    #         resultfile = "result_c.dat"
-    #         avgresfile = "avgres_c.dat"
-
-    dirty = False
-    if len(argv)>=3:
-        if(argv[2]=="--dirty"):
-            dirty = True
 
     topo = CentralizedTopo(hostnumber)
-    # topo = LinearTopo(1,hostnumber) # The same.
     net = Mininet(topo=topo, link=TCLink, autoStaticArp=False)
     net.start()
-    # Test connectivity.
-    if not dirty:
-        net.pingAll()
 
     # clean the files.
     for file_receive in glob.glob("file_receive*"):
@@ -72,15 +57,11 @@ def FileTransfer(hostnumber=2):
     sleep(2)
     
     # All other host request files.
+    # The last host will be monitored.
     for i in range(1,hostnumber):
         net.hosts[i].cmdPrint(clientcmd,chunkSize,net.hosts[0].IP(),net.hosts[i].IP(),"" if i == hostnumber - 1 else "&")
         
-    CLI(net)
-    
-    # check the difference.
-    # if not dirty:
-    #     for i in range(1,hostnumber):
-    #         run("diff file.txt file_receive_"+net.hosts[i].name+".txt")
+    # CLI(net)
 
     results = []
     with open(resultfile,"r") as rf:
@@ -97,5 +78,8 @@ def FileTransfer(hostnumber=2):
 
 if __name__=="__main__":
     lg.setLogLevel( 'info' )
-    hostnumber = input("Please input hostnumber:")
-    FileTransfer(int(hostnumber))
+    if len(argv)>=2:
+        hostnumber = int(argv[1])
+    else:
+        hostnumber = int(input("Please input hostnumber:"))
+    FileTransfer(hostnumber)

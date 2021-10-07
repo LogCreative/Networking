@@ -51,7 +51,7 @@ You can use any programming language. You need to submit your code together with
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\linewidth]{runcsmodel}
-    \caption{Mininet 测试}\label{fig:csmodelrun}
+    \caption{C/S Mininet 测试}\label{fig:csmodelrun}
 \end{figure}
 
 由图 \ref{fig:csmodeltest} 所示，所有的客户机会同时从服务器获取上述的 10MB 文件，每个客户机会在完成传输后各自存储为对应的 \verb"file_receive_h*.txt" 文件，并将计时结果写入文件 \verb"result_py.dat"，当 Mininet 退出 CLI 的时候（\verb"quit"指令），就会对结果进行统计，并给出平均时间。
@@ -78,45 +78,6 @@ You can use any programming language. You need to submit your code together with
     \end{tikzpicture}
     \caption{不同的客户机数量下平均传输时间}\label{fig:csmodelstat}
 \end{figure}    
-
-下面给出了 Mininet 配置的具体代码。实际上星状网络可以采用 \verb"LinearTopo" 代替，此处为了更好地控制源码，就采用了手写的 \verb"CentralizedTopo" 网络结构。
-
-\code{csmodel/centralized.py}
-
-\subsection{C/S 模型 Python 实现 \faPython}
-
-为了方便理解 TCP 网络模型，先跟着书用 Python 实现了一遍多线程 C/S 模型。
-
-下面是服务器端的代码，在主循环中由 \verb"accept()" 阻塞接收，一旦有客户机进入就会开辟新的线程进行文件传输。
-
-\code{csmodel/server.py}
-
-下面是客户端代码，由于 TCP 连接接收大小有一定的限制，超过限制可能就会产生长期接收不到的情况，所以每次只会接收 1024 字节，分为多次进行接收。由于 Python 内存访问比较慢，这里直接就写入了文件，没有首先将内容进入内存。
-
-\code{csmodel/client.py}
-
-\subsection{C/S 模型 C 实现 \textsf{C}}
-
-如果想运行 C 语言版本，进行单机测试：
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{cstest}
-    \caption{C 语言单机测试}
-\end{figure}
-
-进行 Mininet 测试需要使用参数 \verb" c --dirty"。
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{cruncsmodel}
-    \caption{C 语言多机测试}
-\end{figure}
-
-可见使用 C 语言效率更高，1s 不到就可以完成，这也导致如果需要对其评测需要使用很大的文件，否则数据差距并不明显，这里就跳过对 C 语言实现版本的测评部分。下面的代码主要是对示例代码的一些改进而得到的。
-
-\code[language=c]{csmodel/server.cc}
-
-\code[language=c]{csmodel/client.cc}
 
 \section{P2P 模型}
 
@@ -145,4 +106,93 @@ You can use any programming language. You need to submit your code together with
 
     Then, if a client wants piece 2, it will contact 10.0.0.2. If the peer with ip=10.0.0.2 does not have the piece yet, it will contact the server to download this piece first. 
 \end{enumerate}
+
+\subsection{P2P 模型测试}
+
+使用 \verb"p2pmodel/p2ptest.sh" 可以进行批量测试，这一步可以创建一个 10MB 大小的文件 \verb"file.txt"。当然也可以直接运行 \verb"python" 脚本进行测试：
+\begin{verbatim}
+    sudo python p2pmodel/centralized.py 5
+\end{verbatim}
+最后一个参数用于指定主机数量。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{runp2pmodel}
+    \caption{P2P Mininet 测试}\label{fig:p2pmodelrun}
+\end{figure}
+
+\code[language=bash]{p2pmodel/p2ptest.sh}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[xmin={0},
+        ymin={0},
+        xlabel={\# Peer},
+        ylabel={Avg Transfer Time (s)},
+        grid={major},
+        ]
+         \addplot+ [] table[] {p2pmodel/avgres_py.dat};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{不同的对等方数量下平均传输时间}\label{fig:p2pmodelstat}
+\end{figure}
+
+\appendix
+
+\section{C/S 模型架构实现}
+
+下面给出了 Mininet 配置的具体代码。实际上星状网络可以采用 \verb"LinearTopo" 代替，此处为了更好地控制源码，就采用了手写的 \verb"CentralizedTopo" 网络结构。
+
+\code{csmodel/centralized.py}
+
+\section{C/S 模型 Python 实现 \faPython}
+
+为了方便理解 TCP 网络模型，先跟着书用 Python 实现了一遍多线程 C/S 模型。
+
+下面是服务器端的代码，在主循环中由 \verb"accept()" 阻塞接收，一旦有客户机进入就会开辟新的线程进行文件传输。
+
+\code{csmodel/server.py}
+
+下面是客户端代码，由于 TCP 连接接收大小有一定的限制，超过限制可能就会产生长期接收不到的情况，所以每次只会接收 1024 字节，分为多次进行接收。由于 Python 内存访问比较慢，这里直接就写入了文件，没有首先将内容进入内存。
+
+\code{csmodel/client.py}
+
+\section{C/S 模型 C 实现 \textsf{C}}
+
+如果想运行 C 语言版本，进行单机测试：
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{cstest}
+    \caption{C 语言单机测试}
+\end{figure}
+
+进行 Mininet 测试需要使用参数 \verb" c --dirty"。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{cruncsmodel}
+    \caption{C 语言多机测试}
+\end{figure}
+
+可见使用 C 语言效率更高，1s 不到就可以完成，这也导致如果需要对其评测需要使用很大的文件，否则数据差距并不明显，这里就跳过对 C 语言实现版本的测评部分。下面的代码主要是对示例代码的一些改进而得到的。
+
+\code[language=c]{csmodel/server.cc}
+
+\code[language=c]{csmodel/client.cc}
+
+\section{P2P 模型架构实现}
+
+\code{p2pmodel/centralized.py}
+
+\section{P2P 模型 Python 实现 \faPython}
+
+服务器与 C/S 模型的差距不大，主要可以接收一个文件块的参数。
+
+\code{p2pmodel/server.py}
+
+对等方的实现相对复杂。
+
+\code{p2pmodel/peer.py}
+
 \end{document}

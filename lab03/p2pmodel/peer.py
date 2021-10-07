@@ -111,9 +111,7 @@ def getContent(tracker):
     for i in range(chunkSize/1024):
         receivedFileChunk = receivedFileChunk + sendPeerSocket.recv(1024).decode()
     print("Received Size from " + tracker[1] + " :" + str(len(receivedFileChunk)))
-    # threadLock.acquire()
     content[tracker[0]] = receivedFileChunk           # write to self content  
-    # threadLock.release()
     trackers[tracker[0]][2] = True            # declare to be useable
     sendPeerSocket.close()
 
@@ -137,8 +135,6 @@ class FetchingThread(threading.Thread):
         for rth in rths:
             rth.join()
 
-# threadLock = threading.Lock()
-
 # Start servicing.
 serth = ServiceThread()
 serth.start()
@@ -150,9 +146,9 @@ fetth.start()
 # Wait for merge
 fetth.join()
 
-# Now, force to download the own chunk
+# Now, force to download the own chunk if it is not downloaded.
 for tracker in trackers:
-    if tracker[1] == hostName:
+    if tracker[1] == hostName and tracker[2] == False:
         DownContent(tracker[0])
 
 # should be done with all file chunks, unless error occurred.

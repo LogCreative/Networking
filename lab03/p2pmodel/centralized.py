@@ -1,3 +1,5 @@
+# python centralized.py [hostnumber]
+
 # To construct a centralized structure
 # for P2P model.
 

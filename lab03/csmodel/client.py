@@ -1,6 +1,7 @@
 from socket import *
 from sys import argv
 import time
+import math
 
 MAXLINE = 1024
 serverName = "127.0.0.1"
@@ -23,7 +24,7 @@ clientSocket.connect((serverName, serverPort))
 
 # To speed up, skip the process of saving it to the memory first.
 with open(filename,"wb") as f:
-    for i in range(MAXLINE/1024):
+    for i in range(int(math.ceil(MAXLINE/1024))):
         f.write(clientSocket.recv(1024).decode())
 
 END_TIME = time.time()

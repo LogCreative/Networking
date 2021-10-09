@@ -9,5 +9,6 @@
 cache/
 *.auxlock
 *.zip
+*.listing
 .fuse_*
 file*

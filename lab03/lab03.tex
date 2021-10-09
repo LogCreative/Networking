@@ -2,7 +2,7 @@
 % Reference:
 % https://shimowendang.com/docs/wGQPHvHrcTTDyChh/read
 \endofdump
-% \tikzexternalize[prefix=cache/]{lab03}
+\tikzexternalize[prefix=cache/]{lab03}
 \begin{document}
 \title{Socket Programming}
 \maketitle
@@ -34,37 +34,16 @@ You can use any programming language. You need to submit your code together with
 
 \subsection{C/S 模型测试}
 
-% 如果遇到意外中断，可以使用 mn 命令清除所有连接。
+\subsubsection{批量测试}
 
-在 root 模式下，使用 \verb"csmodel" 文件夹下的 \verb"cspy_test.sh" 脚本即可测试。
+\begin{lstlisting}[style=commandshell]
+cd csmodel
+./cstest.sh
+\end{lstlisting}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\linewidth]{cspytest}
-    \caption{单机测试}
-\end{figure}
+这将会生成 10 MB 的随机文件 \verb"file.txt"，运行 Python \faPython\ 版本的脚本进行模拟。
 
-本地测试将会在服务器与客户端之间，在 \verb"2683" 端口上传输 10 MB 的文件，传输时长大概在 4s 左右。如果最后没有比较上的异常，就说明被完整地传输了。
-
-\code[language=bash]{csmodel/cspy\_test.sh}
-
-而对于 Mininet 模拟来说，使用 \verb"python" 运行 \verb"csmodel/centralized.py" 脚本即可开始测试星状结构的网络。运行脚本后需要输入测试的主机数量。如果脚本后面添加参数 \verb" py --dirty" 则可以跳过一些检查，这对于客户机数量多的情况比较有用。
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{runcsmodel}
-    \caption{C/S Mininet 测试}\label{fig:csmodelrun}
-\end{figure}
-
-由图 \ref{fig:csmodeltest} 所示，所有的客户机会同时从服务器获取上述的 10MB 文件，每个客户机会在完成传输后各自存储为对应的 \verb"file_receive_h*.txt" 文件，并将计时结果写入文件 \verb"result_py.dat"，当 Mininet 退出 CLI 的时候（\verb"quit"指令），就会对结果进行统计，并给出平均时间。
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{centralized}
-    \caption{运行多机测试}\label{fig:csmodeltest}
-\end{figure}
-
-由图 \ref{fig:csmodelstat} 可见，随着客户机的增长，传输时间也会显著变长。
+由图 \ref{fig:csmodelstat} 可见，随着客户机的增长，传输时间也会线性变长。
 
 \begin{figure}[H]
     \centering
@@ -80,6 +59,56 @@ You can use any programming language. You need to submit your code together with
     \end{tikzpicture}
     \caption{不同的客户机数量下平均传输时间}\label{fig:csmodelstat}
 \end{figure}    
+
+\code[language=bash]{csmodel/cstest.sh}
+
+% 如果遇到意外中断，可以使用 mn 命令清除所有连接。
+
+\subsubsection{单次测试}
+
+\begin{lstlisting}[style=commandshell]
+python centralized.py [hostnumber] [py|c] [--dirty]
+
+# [hostnumber] is the number of hosts in the structure (including the server)
+# py will launch python script, while c will launch c version.
+# --dirty will pass all the checking
+\end{lstlisting}
+
+使用 \verb"python" 运行 \verb"csmodel/centralized.py" 脚本即可开始测试星状结构的网络。如果没有给定主机数量，运行脚本后就会提示输入。如果脚本后面添加参数 \verb" py --dirty" 则可以跳过一些检查，这对于客户机数量多的情况比较有用。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{runcsmodel}
+    \caption{C/S Mininet 测试}\label{fig:csmodelrun}
+\end{figure}
+
+C/S 模型架构实现代码见附录 \ref{sec:cscentralized}。由图 \ref{fig:csmodeltest} 所示，所有的客户机会\emph{同时}从服务器获取上述的 10 MB 文件，每个客户机会在完成传输后各自存储为对应的 \verb"file_receive_h*.txt" 文件，并将计时结果写入文件 \verb"result_py.dat"。由于最后一个主机进程会阻塞 Mininet 测试主线程，所以最后一个结束后，等待片刻，就会对结果进行统计，并给出平均时间。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{centralized}
+    \caption{运行多机测试}\label{fig:csmodeltest}
+\end{figure}
+
+\subsubsection{单机测试}
+
+\begin{lstlisting}[style=commandshell]
+./cspy_test.sh
+\end{lstlisting}
+ 
+使用 \verb"csmodel" 文件夹下的 \verb"cspy_test.sh" 脚本即可测试 Python \faPython\ 版本的单服务器---单客户端模型，在 \verb"2683" 端口上传输 10 MB 的文件，传输时长大概在 4s 左右。如果最后没有比较上的异常，就说明被完整地传输了。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{cspytest}
+    \caption{单机测试}
+\end{figure}
+
+\code[language=bash]{csmodel/cspy\_test.sh}
+
+C/S 模型的服务器和客户端 Python \faPython\ 实现见附录 \ref{sec:cspython}。
+
+当然也参考着示例代码实现了 C 语言版本，详见附录 \ref{sec:csc}。C 语言实现版本的速度快很多，基本上不会超过 0.5s 就可以完成上面 Python 的操作，这样会导致数据差别小，就不给出 C 语言测试版本的运行时间测试了，注意 C 语言版本使用了 2680 端口。
 
 \section{P2P 模型}
 
@@ -111,19 +140,14 @@ You can use any programming language. You need to submit your code together with
 
 \subsection{P2P 模型测试}
 
-使用 \verb"p2pmodel/p2ptest.sh" 可以进行批量测试，这一步可以创建一个 10MB 大小的文件 \verb"file.txt"。当然也可以直接运行 \verb"python" 脚本进行测试：
-\begin{verbatim}
-    sudo python p2pmodel/centralized.py 5
-\end{verbatim}
-最后一个参数用于指定主机数量。
+\subsubsection{批量测试}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{runp2pmodel}
-    \caption{P2P Mininet 测试}\label{fig:p2pmodelrun}
-\end{figure}
+\begin{lstlisting}[style=commandshell]
+cd p2pmodel
+./p2ptest.sh
+\end{lstlisting}
 
-\code[language=bash]{p2pmodel/p2ptest.sh}
+使用 \verb"p2pmodel/p2ptest.sh" 可以进行批量测试，这一步可以创建一个 10MB 大小的文件 \verb"file.txt"。图 \ref{fig:p2pmodelstat} 显示了对等方的数目多少不会导致传输时间的太大波动，至少不是 C/S 模型的线性增长。
 
 \begin{figure}[H]
     \centering
@@ -134,21 +158,63 @@ You can use any programming language. You need to submit your code together with
         ylabel={Avg Transfer Time (s)},
         grid={major},
         ]
+        \pgfplotsset{cycle list shift=1};
          \addplot+ [] table[] {p2pmodel/avgres_py.dat};
         \end{axis}
     \end{tikzpicture}
     \caption{不同的对等方数量下平均传输时间}\label{fig:p2pmodelstat}
 \end{figure}
 
+\code[language=bash]{p2pmodel/p2ptest.sh}
+
+\subsubsection{单次测试}
+
+当然也可以直接运行 \verb"python" 脚本进行测试：
+\begin{lstlisting}[style=commandshell]
+python centralized.py 5
+\end{lstlisting}
+最后一个参数用于指定主机数量。请注意，应当先生成文件再进行单次测试。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{runp2pmodel}
+    \caption{P2P Mininet 测试}\label{fig:p2pmodelrun}
+\end{figure}
+
+附录 \ref{sec:p2pcentralized} 显示了 P2P 模型的 Mininet 架构实现。制定了主机数量后，会生成对应的 \verb"tracker.dat" 文件，和题设一样的格式。
+
+附录 \ref{sec:p2ppy} 显示了 P2P 模型的服务端和对等端实现。关于对等方，重要的一点是每个对等方也会新建一个服务器线程，以向其他对等方发送数据，如果本地没有文件，就会先阻塞地向服务器获取数据。对等端内部会使用一个数据结构存储已经得到的文件块信息，最后会等待所有向其他对等方的传输线程终止，才会准备将数据写入文件。由于实现起来较为复杂，就不提供 C 语言实现版本。
+
+\section{结论}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[xmin={0},
+        ymin={0},
+        xlabel={\# Client / \# Peer},
+        ylabel={Avg Transfer Time (s)},
+        grid={major},
+        ]
+        \addplot+ [] table[] {csmodel/avgres_py.dat};
+         \addplot+ [] table[] {p2pmodel/avgres_py.dat};
+         \legend{C/S,P2P}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{平均传输时间比较 \faPython}\label{fig:p2pmodelstat}
+\end{figure}
+
+将统计数据放在一张图上，会发现后面 C/S 模型仍然在线性增长，而 P2P 模型并不怎么增长。而 P2P 在创建线程（增加连接数）上的开销要比 C/S 模型大很多，使用本地虚拟机的 Mininet 模拟会在这个方面遭受性能问题，对等方数目再多甚至会报错。
+
 \appendix
 
-\section{C/S 模型架构实现}
+\section{C/S 模型架构实现}\label{sec:cscentralized}
 
-下面给出了 Mininet 配置的具体代码。实际上星状网络可以采用 \verb"LinearTopo" 代替，此处为了更好地控制源码，就采用了手写的 \verb"CentralizedTopo" 网络结构。
+下面给出了 Mininet 配置的具体代码。实际上星状网络可以采用 \verb"LinearTopo" 代替，此处为了更好地控制源码，就采用了手写的 \verb"CentralizedTopo" 网络结构。\verb"dumpNodeConnection" 是重要的，这样才可以防止 IP 地址被重复使用。
 
 \code{csmodel/centralized.py}
 
-\section{C/S 模型 Python 实现 \faPython}
+\section{C/S 模型 Python 实现 \faPython}\label{sec:cspython}
 
 为了方便理解 TCP 网络模型，先跟着书用 Python 实现了一遍多线程 C/S 模型。
 
@@ -160,7 +226,7 @@ You can use any programming language. You need to submit your code together with
 
 \code{csmodel/client.py}
 
-\section{C/S 模型 C 实现 \textsf{C}}
+\section{C/S 模型 C 实现 \textsf{C}}\label{sec:csc}
 
 如果想运行 C 语言版本，进行单机测试：
 \begin{figure}[H]
@@ -181,19 +247,25 @@ You can use any programming language. You need to submit your code together with
 
 \code[language=c]{csmodel/server.cc}
 
+服务器会首先读取文件数据。与一个客户机建立连接后，就会开辟一个新的线程，但是这个线程会与主线程显式脱离，以传输数据。
+
 \code[language=c]{csmodel/client.cc}
 
-\section{P2P 模型架构实现}
+客户端会首先将数据存储在内存中，再写入文件。
+
+\section{P2P 模型架构实现}\label{sec:p2pcentralized}
 
 \code{p2pmodel/centralized.py}
 
-\section{P2P 模型 Python 实现 \faPython}
+\section{P2P 模型 Python 实现 \faPython}\label{sec:p2ppy}
 
 服务器与 C/S 模型的差距不大，主要可以接收一个文件块的参数。
 
 \code{p2pmodel/server.py}
 
-对等方的实现相对复杂。
+对等方的实现相对复杂。主要有两种线程：\verb"ServiceThread" 用于向其他对等方提供服务（或者会向服务器获取数据，如果最后没有完整传输，会强制从服务器获取对应的数据）；另一方面，\verb"FetchingThread" 用于从其他对等方获取数据，并在最后合并到主线程。
+
+由于数据上并没有线程间依赖，所以可以不加线程锁进行同步，编程上在这方面也有着对应的考虑。有时候对等方的服务线程可能还没有开启，会有失联的情况，这时会尝试一次重连，基本上都可以正确传输（对等方数目适当的情况下）。
 
 \code{p2pmodel/peer.py}
 

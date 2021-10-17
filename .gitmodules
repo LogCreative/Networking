@@ -1,3 +1,6 @@
 [submodule "mininet"]
 	path = mininet
 	url = https://github.com/mininet/mininet.git
+[submodule "B4PaperReading"]
+	path = B4PaperReading
+	url = https://github.com/LogCreative/B4PaperReading.git

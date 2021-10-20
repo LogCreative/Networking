@@ -1,4 +1,4 @@
-# 2. Enable TCP Reno and your selected TCP congestion control algorithm, and test them in Mininet.
+# 3. Construct a network with only one pair of sender and receiver. Study how TCP throughput varies with respect to link bandwidth/link delay/loss rate for the above two TCP versions.
 
 from time import sleep
 from mininet.link import TCLink
@@ -38,7 +38,7 @@ def BandwidthTest():
             net.stop()
     with open('bandwidth.dat','a') as f:
         for bw in bwdict.keys():
-            f.write(bw+'\t'+'\t'.join(bwdict[bw])+'\n')
+            f.write(str(bw)+'\t'+'\t'.join(bwdict[bw])+'\n')
 
 def DelayTest():
     with open('delay.dat','w') as f:
@@ -60,7 +60,7 @@ def DelayTest():
             net.stop()
     with open('delay.dat','a') as f:
         for delay in delaydict.keys():
-            f.write(delay+'\t'+'\t'.join(delaydict[delay])+'\n')
+            f.write(str(delay)+'\t'+'\t'.join(delaydict[delay])+'\n')
 
 def LossTest():
     with open('loss.dat','w') as f:
@@ -82,7 +82,7 @@ def LossTest():
             net.stop()
     with open('loss.dat','a') as f:
         for loss in lossdict.keys():
-            f.write(loss+'\t'+'\t'.join(lossdict[loss])+'\n')
+            f.write(str(loss)+'\t'+'\t'.join(lossdict[loss])+'\n')
 
 
 if __name__ == '__main__':

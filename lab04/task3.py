@@ -36,8 +36,9 @@ def BandwidthTest():
             bwdict[bw] += [str(clientbw[:-10])]
             print(str(bw)+'\t'+tcp+'\t'+clientbw)
             net.stop()
+            sleep(2)
     with open('bandwidth.dat','a') as f:
-        for bw in bwdict.keys():
+        for bw in sorted(bwdict.keys()):
             f.write(str(bw)+'\t'+'\t'.join(bwdict[bw])+'\n')
 
 def DelayTest():
@@ -58,8 +59,9 @@ def DelayTest():
             delaydict[delay] += [str(clientbw[:-10])]
             print(str(delay)+'\t'+tcp+'\t'+clientbw)
             net.stop()
+            sleep(2)
     with open('delay.dat','a') as f:
-        for delay in delaydict.keys():
+        for delay in sorted(delaydict.keys()):
             f.write(str(delay)+'\t'+'\t'.join(delaydict[delay])+'\n')
 
 def LossTest():
@@ -80,8 +82,9 @@ def LossTest():
             lossdict[loss] += [str(clientbw[:-10])]
             print(str(loss)+'\t'+tcp+'\t'+clientbw)
             net.stop()
+            sleep(2)
     with open('loss.dat','a') as f:
-        for loss in lossdict.keys():
+        for loss in sorted(lossdict.keys()):
             f.write(str(loss)+'\t'+'\t'.join(lossdict[loss])+'\n')
 
 

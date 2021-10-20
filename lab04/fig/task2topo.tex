@@ -1,0 +1,13 @@
+\begin{tikzpicture}
+    \tikzstyle{host}=[draw]
+    \tikzstyle{switch}=[draw]
+    \tikzstyle{connection}=[]
+    \tikzstyle{constr}=[right,font=\ttfamily\small]
+    \node [host] (h1) at (0,4) {h1};
+    \node [switch] (s1) at (0,3) {s1};
+    \node [switch] (s2) at (0,2) {s2};
+    \node [host] (h2) at (0,1) {h2};
+    \draw (h1) edge node [constr] {100Mbps,5ms} (s1);
+    \draw (s1) edge node [constr] {100Mbps,200ms} (s2);
+    \draw (s2) edge node [constr] {100Mbps,5ms} (h2);
+\end{tikzpicture}

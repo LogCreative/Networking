@@ -12,3 +12,4 @@ cache/
 *.listing
 .fuse_*
 file*
+ref/

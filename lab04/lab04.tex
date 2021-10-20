@@ -1,0 +1,61 @@
+%&"../net"
+% https://shimo.im/docs/DjHrkvYGxwpPPPhq/read
+\endofdump
+\tikzexternalize[prefix=cache/]{lab04}
+\begin{document}
+    \title{Test TCP Performance}
+    \maketitle
+    \tableofcontents
+    \vfill
+    In this lab, we test TCP performance using Mininet. There are different TCP congestion control algorithms, each was designed with different optimization purpose. You can enable different TCP algorithms easily in Ubuntu.
+    \vfill
+    \clearpage
+    \section{TCP Vegas}
+    Pick one TCP congestion control algorithm other than TCP Reno, and explain how it works.
+
+    Vegas 的基本思想是：
+    \begin{enumerate}[(1)]
+        \item 在分组丢失发生之前，在源与目的地之间检测路由器中的拥塞；
+        \item 当检测出快要发生的分组丢失时，\textbf{线性地}降低发送速率。
+    \end{enumerate}
+
+    \section{测试拥塞控制算法}
+    Enable TCP Reno and your selected TCP congestion control algorithm, and test them in Mininet.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{enable}
+        \caption{开启TCP拥塞控制算法}\label{fig:enable}
+    \end{figure}
+
+    \noindent
+    \begin{minipage}{0.4\textwidth}
+        \begin{figure}[H]
+            \centering
+            \input{fig/task2topo.tex}
+            \caption{测试结构}
+        \end{figure}
+        \begin{table}[H]
+            \centering
+            \caption{TCP 吞吐量（Mbps）}
+            \pgfplotstabletypeset[columns/Alg/.style={string type}]{default.dat}
+        \end{table}
+    \end{minipage}
+    \begin{minipage}{0.6\textwidth}
+        \begin{figure}[H]
+            \begin{tikzpicture}
+                \begin{axis}[width=\linewidth,xlabel={Alg},
+                ylabel={Throughput (Mbps)},
+                ymin={0},
+                symbolic x coords={reno,vegas}, xtick=data,
+                ybar,enlarge x limits=0.8,]
+                 \addplot+ [] table[x=Alg,y=Throughput,] {default.dat};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{TCP 吞吐量}
+        \end{figure}
+    \end{minipage}
+
+    
+
+\end{document}

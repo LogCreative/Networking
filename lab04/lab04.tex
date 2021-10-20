@@ -15,7 +15,7 @@
 
     Vegas 的基本思想是：
     \begin{enumerate}[(1)]
-        \item 在分组丢失发生之前，在源与目的地之间检测路由器中的拥塞；
+        \item 在分组丢失发生之前，在源与目的地之间检测路由器中的拥塞（通过 RTT 预测）；
         \item 当检测出快要发生的分组丢失时，\textbf{线性地}降低发送速率。
     \end{enumerate}
 
@@ -33,7 +33,7 @@
         \begin{figure}[H]
             \centering
             \input{fig/task2topo.tex}
-            \caption{测试结构}
+            \caption{测试结构}\label{fig:task2topo}
         \end{figure}
         \begin{table}[H]
             \centering
@@ -56,6 +56,29 @@
         \end{figure}
     \end{minipage}
 
-    
+    首先开启 TCP 拥塞控制算法 TCP Vegas，见图 \ref{fig:enable}。之后对两种算法进行测试，架构如图 \ref{fig:task2topo}，测试代码见\href{./task2.py}{\ttfamily task2.py}。
+
+    \section{多因素分析}
+    Construct a network with only one pair of sender and receiver. Study how TCP throughput varies with respect to link bandwidth/link delay/loss rate for the above two TCP versions.
+
+    默认状态就是上一节图 \ref{fig:task2topo} 所对应的状态。本节测试的目的是为了对拥塞进行分析，所以对于\textbf{两个交换机之间的连接}进行单变量限制，也就是在默认值左右进行调整，以查看相关结果。
+
+    \subsection{带宽}
+
+    带宽进行$\pm $80 Mbps 测试，每 10 Mbps 分为一个间隔。
+
+    \subsection{延迟}
+
+    延迟进行$\pm$ 200 ms 测试，每 40 ms 分一个间隔。
+
+    \subsection{丢包}
+
+    丢包进行$-10\%\sim +50\%$ 测试，每 5\% 分一个间隔。
+
+    \section{多机分析}
+
+    Construct a network with a bottleneck link shared by multiple pairs of senders and receivers. Study how these sender-receiver pairs share the bottleneck link.
+
+
 
 \end{document}

@@ -4,3 +4,6 @@
 [submodule "B4PaperReading"]
 	path = B4PaperReading
 	url = https://github.com/LogCreative/B4PaperReading.git
+[submodule "ryu"]
+	path = ryu
+	url = https://github.com/faucetsdn/ryu.git

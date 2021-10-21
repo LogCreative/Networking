@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     finish = clock();
 
     FILE* rf = fopen("result_c.dat","a");
-    double speed = MAXLINE/((double)(finish-start)/CLOCKS_PER_SEC)*8; // measured in Mbps
+    double speed = MAXLINE/((double)(finish-start)/CLOCKS_PER_SEC)*8/1000000; // measured in Mbps
     if (argc==4)
         fprintf(rf,"%s\t%f\n",argv[3],speed);
     else fprintf(rf,"\t%f\n",speed);

@@ -1,5 +1,7 @@
 # 4. Construct a network with a bottleneck link shared by multiple pairs of senders and receivers. Study how these sender-receiver pairs share the bottleneck link.
 
+import glob
+import os
 from time import time
 from select import poll, POLLIN
 from subprocess import Popen, PIPE
@@ -10,39 +12,6 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.util import decode, dumpNodeConnections, quietRun
 from mininet.log import setLogLevel, info
-
-def monitorFiles( outfiles, seconds, timeoutms ):
-    "Monitor set of files and return [(host, line)...]"
-    devnull = open( '/dev/null', 'w' )
-    tails, fdToFile, fdToHost = {}, {}, {}
-    for h, outfile in outfiles.items():
-        tail = Popen( [ 'tail', '-f', outfile ],
-                      stdout=PIPE, stderr=devnull )
-        fd = tail.stdout.fileno()
-        tails[ h ] = tail
-        fdToFile[ fd ] = tail.stdout
-        fdToHost[ fd ] = h
-    # Prepare to poll output files
-    readable = poll()
-    for t in tails.values():
-        readable.register( t.stdout.fileno(), POLLIN )
-    # Run until a set number of seconds have elapsed
-    endTime = time() + seconds
-    while time() < endTime:
-        fdlist = readable.poll(timeoutms)
-        if fdlist:
-            for fd, _flags in fdlist:
-                f = fdToFile[ fd ]
-                host = fdToHost[ fd ]
-                # Wait for a line of output
-                line = f.readline().strip()
-                yield host, decode( line )
-        else:
-            # If we timed out, return nothing
-            yield None, ''
-    for t in tails.values():
-        t.terminate()
-    devnull.close()  # Not really necessary
 
 class MultiplePairTopo(Topo):
     def build (self,N=3):
@@ -55,9 +24,16 @@ class MultiplePairTopo(Topo):
             host = self.addHost('h'+str(i), cpu=.25/N)
             self.addLink(switch2, host, bw=i*20)
 
-def Test(tcp,seconds=15):
+def Test(tcp,hostnumber=3):
     "Create network and run simple performace test."
-    topo = MultiplePairTopo(N=5)
+
+    fileSize = os.path.getsize("file.txt")
+
+    # clean the files.
+    for file_receive in glob.glob("file_receive*"):
+        os.remove(file_receive)
+
+    topo = MultiplePairTopo(N=hostnumber)
     net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, autoStaticArp=False)
     net.start()
     hosts = net.hosts
@@ -66,29 +42,21 @@ def Test(tcp,seconds=15):
     assert tcp in output
     
     server = hosts[0]
-    outfiles,errfiles = {},{}
-    for h in hosts:
-        outfiles[ h ] = '/tmp/%s.out' % h.name
-        errfiles[ h ] = '/tmp/%s.err' % h.name
-        h.cmd( 'echo >', outfiles[ h ] )
-        h.cmd( 'echo >', errfiles[ h ] )
-        # Create and/or erase output files
-        if h == server:
-            h.cmdPrint('iperf3','-s','-i','1','-p','3389',
-                    '>', outfiles[ h ],
-                   '2>', errfiles[ h ],
-                   '&')
-        else:
-            h.cmdPrint('iperf3','-c',server.IP(),'-p','3389',
-                    '>', outfiles[ h ],
-                   '2>', errfiles[ h ],
-                   '&',)
-    info( "Monitoring output for", seconds, "seconds\n" )
-    for h, line in monitorFiles( outfiles, seconds, timeoutms=500 ):
-        if h:
-            info( '%s: %s\n' % ( h.name, line ) )
-    for h in hosts:
-        h.cmd('kill %iperf')
+    server.cmdPrint("./server","&")
+    sleep(2)
+    for i in range(1,hostnumber):
+        hosts[i].cmdPrint("./client",fileSize,server.IP(),hosts[i].name,"" if i == hostnumber - 1 else "&")
+
+    complete = 0
+    while not complete == hostnumber:
+        results = []
+        with open("result_c.dat","r") as rf:
+            resultlines = rf.read().splitlines()
+            complete = len(resultlines)
+            for i in range(1,len(resultlines)):
+                results.append(float(resultlines[i].split('\t')[1]))
+        sleep(10)
+    
     net.stop()
 
 if __name__ == '__main__':

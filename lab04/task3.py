@@ -1,5 +1,6 @@
 # 3. Construct a network with only one pair of sender and receiver. Study how TCP throughput varies with respect to link bandwidth/link delay/loss rate for the above two TCP versions.
 
+import os
 from time import sleep
 from mininet.link import TCLink
 from mininet.node import CPULimitedHost
@@ -18,81 +19,47 @@ class SingleSwitchTopo(Topo):
         self.addLink(host2, switch2, bw=100, delay='5ms', loss=0, use_htb=True)
         self.addLink(switch1, switch2, bw=bw, delay=delay, loss=loss, use_htb=True)
 
-def BandwidthTest():
-    with open('bandwidth.dat','w') as f:
-        f.write('Bandwidth\treno\tvegas\n')
-    bwrange = range(20,181,10)
-    bwdict = {bw:[] for bw in bwrange}
+def Test(type="bandwidth"):
+    with open(type+'.dat','w') as f:
+        f.write(type+'\treno\tvegas\n')
+    if type=="bandwidth":
+        myrange = range(20,181,10)
+    elif type=="delay":
+        myrange = range(0,401,40)
+    elif type=="loss":
+        myrange = range(0,61,5)
+    mydict = {limit:[] for limit in myrange}
+    fileSize = os.path.getsize("file.txt")
     for tcp in ["reno","vegas"]:
         output = quietRun('sysctl -w net.ipv4.tcp_congestion_control=' + tcp +'\n')
         assert tcp in output
-        for bw in bwrange:
-            topo = SingleSwitchTopo(bw=bw)
+        for limit in myrange:
+            if type=="bandwidth":
+                topo = SingleSwitchTopo(bw=limit)
+            elif type=="delay":
+                topo = SingleSwitchTopo(delay=str(limit)+'ms')
+            elif type=="loss":
+                topo = SingleSwitchTopo(loss=limit/100)
             net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, autoStaticArp=False)
             net.start()
             dumpNodeConnections(net.hosts)
             h1, h2 = net.getNodeByName('h1','h2')
-            _serverbw, clientbw = net.iperf([h1,h2],seconds=10)
-            bwdict[bw] += [str(clientbw[:-10])]
-            print(str(bw)+'\t'+tcp+'\t'+clientbw)
+            h1.cmdPrint("./server","&")
+            res = h2.cmdPrint("./client",fileSize,h1.IP(),h2.name)
+            res = res.rstrip('\n')
+            print(str(limit)+'\t'+res)
+            mydict[limit] += [res]
             net.stop()
-            sleep(2)
-    with open('bandwidth.dat','a') as f:
-        for bw in sorted(bwdict.keys()):
-            f.write(str(bw)+'\t'+'\t'.join(bwdict[bw])+'\n')
-
-def DelayTest():
-    with open('delay.dat','w') as f:
-        f.write('Delay\treno\tvegas\n')
-    delayrange = range(0,401,40)
-    delaydict = {delay:[] for delay in delayrange}
-    for tcp in ["reno","vegas"]:
-        output = quietRun('sysctl -w net.ipv4.tcp_congestion_control=' + tcp +'\n')
-        assert tcp in output
-        for delay in delayrange:
-            topo = SingleSwitchTopo(delay=str(delay)+'ms')
-            net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, autoStaticArp=False)
-            net.start()
-            dumpNodeConnections(net.hosts)
-            h1, h2 = net.getNodeByName('h1','h2')
-            _serverbw, clientbw = net.iperf([h1,h2],seconds=10)
-            delaydict[delay] += [str(clientbw[:-10])]
-            print(str(delay)+'\t'+tcp+'\t'+clientbw)
-            net.stop()
-            sleep(2)
-    with open('delay.dat','a') as f:
-        for delay in sorted(delaydict.keys()):
-            f.write(str(delay)+'\t'+'\t'.join(delaydict[delay])+'\n')
-
-def LossTest():
-    with open('loss.dat','w') as f:
-        f.write('Loss\treno\tvegas\n')
-    lossrange = range(0,61,5)
-    lossdict = {loss:[] for loss in lossrange}
-    for tcp in ["reno","vegas"]:
-        output = quietRun('sysctl -w net.ipv4.tcp_congestion_control=' + tcp +'\n')
-        assert tcp in output
-        for loss in lossrange:
-            topo = SingleSwitchTopo(loss=loss/100)
-            net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink, autoStaticArp=False)
-            net.start()
-            dumpNodeConnections(net.hosts)
-            h1, h2 = net.getNodeByName('h1','h2')
-            _serverbw, clientbw = net.iperf([h1,h2],seconds=10)
-            lossdict[loss] += [str(clientbw[:-10])]
-            print(str(loss)+'\t'+tcp+'\t'+clientbw)
-            net.stop()
-            sleep(2)
-    with open('loss.dat','a') as f:
-        for loss in sorted(lossdict.keys()):
-            f.write(str(loss)+'\t'+'\t'.join(lossdict[loss])+'\n')
-
+            sleep(3)
+    with open(type+'.dat','a') as f:
+        for limit in sorted(mydict.keys()):
+            f.write(str(limit)+'\t'+'\t'.join(mydict[limit])+'\n')
 
 if __name__ == '__main__':
     # setLogLevel('info')
     print('*** Bandwidth Test')
-    BandwidthTest()
+    Test("bandwidth")
     print('*** Delay Test')
-    DelayTest()
+    Test("delay")
     print('*** Loss Test')
-    LossTest()
+    Test("loss")

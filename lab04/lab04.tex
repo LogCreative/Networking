@@ -61,43 +61,64 @@
     \section{多因素分析}
     Construct a network with only one pair of sender and receiver. Study how TCP throughput varies with respect to link bandwidth/link delay/loss rate for the above two TCP versions.
 
-    默认状态就是上一节图 \ref{fig:task2topo} 所对应的状态。本节测试的目的是为了对拥塞进行分析，所以对于\textbf{两个交换机之间的连接}进行单变量限制，也就是在默认值左右进行调整，以查看相关结果。
+   本节测试的目的是为了对拥塞进行分析，所以对于\textbf{两个交换机之间的连接}进行单变量限制，默认值为 100 Mbps，无延迟无丢包，以查看相关结果。测试代码见 \href{./task3.py}{\ttfamily task3.py}。
+
+   \begin{figure}[H]
+       \centering
+       \input{fig/task3topo.tex}
+       \caption{拓扑结构}\label{fig:task3topo}
+   \end{figure}
 
     \subsection{带宽}
 
-    带宽进行$\pm $80 Mbps 测试，每 10 Mbps 分为一个间隔。
+    带宽进行[20,180]Mbps 测试，每 10 Mbps 分为一个间隔。吞吐量随着带宽的增加几乎是正相关增长的，达到瓶颈后略有波动。其中 Reno 的带宽整体较高。
 
-    \begin{tikzpicture}
-        \begin{axis}[ymax=200]
+   \begin{figure}[H]
+       \centering
+       \begin{tikzpicture}
+        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Bandwidth (Mbps)},legend pos={south east}]
          \pgfplotstableread [] {bandwidth.dat}{\bw};
-         \addplot+ [] table[x=Bandwidth,y=reno,] {\bw};
-         \addplot+ [] table[x=Bandwidth,y=vegas,] {\bw};
+         \addplot+ [] table[x=bandwidth,y=reno,] {\bw};
+         \addplot+ [] table[x=bandwidth,y=vegas,] {\bw};
+         \legend{reno,vegas}
         \end{axis}
     \end{tikzpicture}
+       \caption{带宽测试}\label{fig:bandwidth}
+   \end{figure}
 
     \subsection{延迟}
 
-    延迟进行$\pm$ 200 ms 测试，每 40 ms 分一个间隔。
+    延迟进行[0,400]ms 测试，每 40 ms 分一个间隔。随着延迟的增长，吞吐量整体下降，Vegas 应对延迟性能较好。
 
-    \begin{tikzpicture}
-        \begin{axis}[]
+   \begin{figure}[H]
+       \centering
+       \begin{tikzpicture}
+        \begin{axis}[xmin=0,ymin=0,ymax=20,ylabel={TCP Throughput (Mbps)},xlabel={Delay (ms)}]
          \pgfplotstableread [] {delay.dat}{\delay};
-         \addplot+ [] table[x=Delay,y=reno,] {\delay};
-         \addplot+ [] table[x=Delay,y=vegas,] {\delay};
+         \addplot+ [] table[x=delay,y=reno,] {\delay};
+         \addplot+ [] table[x=delay,y=vegas,] {\delay};
+         \legend{reno,vegas}
         \end{axis}
     \end{tikzpicture}
+       \caption{延迟测试}\label{fig:delay}
+   \end{figure}
 
     \subsection{丢包}
 
-    丢包进行$-10\%\sim +50\%$ 测试，每 5\% 分一个间隔。
+    丢包进行[0,60]\% 测试，每 5\% 分一个间隔。丢包率增加对吞吐量变化几乎没有什么太大影响。Reno 较好。
 
-    \begin{tikzpicture}
-        \begin{axis}[]
+   \begin{figure}[H]
+       \centering
+       \begin{tikzpicture}
+        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Loss (\%)},legend pos={south east}]
          \pgfplotstableread [] {loss.dat}{\loss};
-         \addplot+ [] table[x=Loss,y=reno,] {\loss};
-         \addplot+ [] table[x=Loss,y=vegas,] {\loss};
+         \addplot+ [] table[x=loss,y=reno,] {\loss};
+         \addplot+ [] table[x=loss,y=vegas,] {\loss};
+         \legend{reno,vegas}
         \end{axis}
     \end{tikzpicture}
+       \caption{丢包测试}\label{fig:loss}
+   \end{figure}
 
     \section{多机分析}
 
@@ -162,7 +183,7 @@
         \end{minipage}
     \end{figure}
 
-    图 \ref{fig:renom} 显示了 Reno 对于带宽分配上更加接近 Max-min Fairness，整体带宽为 40Mbps。而图 \ref{fig:vegasm} 显示 Vegas 更倾向于高带宽给高速度，提高了总体的带宽利用率（43Mbps）。
+    图 \ref{fig:renom} 显示了 Reno 对于带宽分配上更加接近 Max-Min Fairness，整体带宽为 40Mbps。而图 \ref{fig:vegasm} 显示 Vegas 更倾向于高带宽给高速度，提高了总体的带宽利用率（43Mbps）。
 
 
 \end{document}

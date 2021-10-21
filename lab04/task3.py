@@ -10,13 +10,13 @@ from mininet.util import dumpNodeConnections, quietRun
 from mininet.log import setLogLevel, info
 
 class SingleSwitchTopo(Topo):
-    def build (self,bw=100,delay='200ms',loss=0.1):
+    def build (self,bw=100,delay='0ms',loss=0):
         switch1 = self.addSwitch('s1')
         switch2 = self.addSwitch('s2')
         host1 = self.addHost('h1', cpu=.25)
         host2 = self.addHost('h2', cpu=.25)
-        self.addLink(host1, switch1, bw=100, delay='5ms', loss=0, use_htb=True)
-        self.addLink(host2, switch2, bw=100, delay='5ms', loss=0, use_htb=True)
+        self.addLink(host1, switch1, bw=100, use_htb=True)
+        self.addLink(host2, switch2, bw=100, use_htb=True)
         self.addLink(switch1, switch2, bw=bw, delay=delay, loss=loss, use_htb=True)
 
 def Test(type="bandwidth"):
@@ -44,10 +44,18 @@ def Test(type="bandwidth"):
             net.start()
             dumpNodeConnections(net.hosts)
             h1, h2 = net.getNodeByName('h1','h2')
-            h1.cmdPrint("./server","&")
-            res = h2.cmdPrint("./client",fileSize,h1.IP(),h2.name)
-            res = res.rstrip('\n')
-            print(str(limit)+'\t'+res)
+            ## C programming
+            # h1.cmdPrint("./server","&")
+            # res = h2.cmdPrint("./client",fileSize,h1.IP(),h2.name)
+            # res = res.rstrip('\n')
+            # print(str(limit)+'\t'+res)
+            # mydict[limit] += [res]
+            _serverbw, clientbw = net.iperf([h1,h2])
+            if clientbw.find('K')>0:
+                res = str(int(clientbw[:-10])/1000)
+            else:
+                res = clientbw[:-10]
+            print(str(limit)+'\t'+ res)
             mydict[limit] += [res]
             net.stop()
             sleep(3)

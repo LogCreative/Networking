@@ -22,7 +22,7 @@ class MultiplePairTopo(Topo):
         self.addLink(switch1, switch2, bw=100)
         for i in range(1,N+1):
             host = self.addHost('h'+str(i), cpu=.25/N)
-            self.addLink(switch2, host, bw=i*20)
+            self.addLink(switch2, host, bw=i*100/N)
 
 def Test(tcp,hostnumber=3):
     "Create network and run simple performace test."
@@ -42,27 +42,29 @@ def Test(tcp,hostnumber=3):
     assert tcp in output
     
     server = hosts[0]
-    server.cmdPrint("./server","&")
+    server.cmdPrint("python server.py","&")
     sleep(2)
     for i in range(1,hostnumber):
-        hosts[i].cmdPrint("./client",fileSize,server.IP(),hosts[i].name,"" if i == hostnumber - 1 else "&")
+        hosts[i].cmdPrint("python client.py",fileSize,server.IP(),hosts[i].name,"" if i == hostnumber - 1 else "&")
 
     complete = 0
     while not complete == hostnumber:
         results = []
-        with open("result_c.dat","r") as rf:
+        with open("result_py.dat","r") as rf:
             resultlines = rf.read().splitlines()
             complete = len(resultlines)
             for i in range(1,len(resultlines)):
                 results.append(float(resultlines[i].split('\t')[1]))
-        sleep(10)
+        sleep(5)
     
+    os.rename('result_py.dat',tcp+'_multi.dat')
+
     net.stop()
 
 if __name__ == '__main__':
     setLogLevel('info')
     tcp = 'reno'
-    Test(tcp)
+    Test(tcp,5)
     sleep(2)
     tcp = 'vegas'
-    Test(tcp)
+    Test(tcp,5)

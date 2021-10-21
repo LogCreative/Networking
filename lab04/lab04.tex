@@ -76,7 +76,7 @@
    \begin{figure}[H]
        \centering
        \begin{tikzpicture}
-        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Bandwidth (Mbps)},legend pos={south east}]
+        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Bandwidth (Mbps)},legend pos={south east},height=6cm]
          \pgfplotstableread [] {bandwidth.dat}{\bw};
          \addplot+ [] table[x=bandwidth,y=reno,] {\bw};
          \addplot+ [] table[x=bandwidth,y=vegas,] {\bw};
@@ -93,7 +93,7 @@
    \begin{figure}[H]
        \centering
        \begin{tikzpicture}
-        \begin{axis}[xmin=0,ymin=0,ymax=20,ylabel={TCP Throughput (Mbps)},xlabel={Delay (ms)}]
+        \begin{axis}[xmin=0,ymin=0,ymax=20,ylabel={TCP Throughput (Mbps)},xlabel={Delay (ms)},height=6cm]
          \pgfplotstableread [] {delay.dat}{\delay};
          \addplot+ [] table[x=delay,y=reno,] {\delay};
          \addplot+ [] table[x=delay,y=vegas,] {\delay};
@@ -105,12 +105,13 @@
 
     \subsection{丢包}
 
-    丢包进行[0,60]\% 测试，每 5\% 分一个间隔。丢包率增加对吞吐量变化几乎没有什么太大影响。Reno 较好。
+    丢包进行[0,60]\% 测试，每 5\% 分一个间隔。
+    丢包率增加对吞吐量变化几乎没有什么太大影响。Reno 较好。
 
    \begin{figure}[H]
        \centering
        \begin{tikzpicture}
-        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Loss (\%)},legend pos={south east}]
+        \begin{axis}[xmin=0,ymin=0,ylabel={TCP Throughput (Mbps)},xlabel={Loss (\%)},legend pos={south east},height=6cm]
          \pgfplotstableread [] {loss.dat}{\loss};
          \addplot+ [] table[x=loss,y=reno,] {\loss};
          \addplot+ [] table[x=loss,y=vegas,] {\loss};
@@ -118,7 +119,7 @@
         \end{axis}
     \end{tikzpicture}
        \caption{丢包测试}\label{fig:loss}
-   \end{figure}
+    \end{figure}
 
     \section{多机分析}
 
@@ -128,7 +129,7 @@
 
     采用如图 \ref{fig:task4topo} 类似的树状结构，中间会有一个瓶颈 45Mbps 的线路，每一个客户端会分配到 $25\frac{i}{n}$ Mbps 的带宽。
     % 当 $n = 5$ 时，
-    客户端分配的带宽如表 \ref{tab:bandwidth}。框架实现代码见 \href{./task4.py}{\ttfamily task4.py}。
+    客户端分配的带宽如表 \ref{tab:bandwidth}。框架实现代码见 \href{./task4.py}{\ttfamily task4.py}，需要先运行 \href{./prepare.sh}{\ttfamily prepare.sh} 后再开始（产生需要传输的文件）。
 
     \noindent
     \begin{minipage}{0.5\textwidth}

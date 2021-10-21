@@ -50,9 +50,9 @@ def Test(type="bandwidth"):
             # res = res.rstrip('\n')
             # print(str(limit)+'\t'+res)
             # mydict[limit] += [res]
-            _serverbw, clientbw = net.iperf([h1,h2])
+            _serverbw, clientbw = net.iperf([h1,h2],seconds=10)
             if clientbw.find('K')>0:
-                res = str(int(clientbw[:-10])/1000)
+                res = str(float(clientbw[:-10])/1000)
             else:
                 res = clientbw[:-10]
             print(str(limit)+'\t'+ res)

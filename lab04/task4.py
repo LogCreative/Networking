@@ -2,15 +2,12 @@
 
 import glob
 import os
-from time import time
-from select import poll, POLLIN
-from subprocess import Popen, PIPE
 from time import sleep
 from mininet.link import TCLink
 from mininet.node import CPULimitedHost
 from mininet.topo import Topo
 from mininet.net import Mininet
-from mininet.util import decode, dumpNodeConnections, quietRun
+from mininet.util import dumpNodeConnections, quietRun
 from mininet.log import setLogLevel, info
 
 class MultiplePairTopo(Topo):

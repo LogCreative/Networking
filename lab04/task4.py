@@ -19,10 +19,10 @@ class MultiplePairTopo(Topo):
         switch2 = self.addSwitch('s2')
         host0 = self.addHost('h0',cpu=.25)      # served as the server
         self.addLink(switch1, host0, bw=200)
-        self.addLink(switch1, switch2, bw=100)
-        for i in range(1,N+1):
+        self.addLink(switch1, switch2, bw=45)
+        for i in range(1,N):
             host = self.addHost('h'+str(i), cpu=.25/N)
-            self.addLink(switch2, host, bw=i*100/N)
+            self.addLink(switch2, host, bw=i*25/N)
 
 def Test(tcp,hostnumber=3):
     "Create network and run simple performace test."

@@ -103,7 +103,66 @@
 
     Construct a network with a bottleneck link shared by multiple pairs of senders and receivers. Study how these sender-receiver pairs share the bottleneck link.
 
-    由于 iPerf 不支持服务器并发服务，所以不能通过这种基准工具的方法进行测试。
+    由于 iPerf 不支持服务器并发服务，所以不能通过这种基准工具的方法进行测试。将采用 Socket Programming 实验中的 C/S 模型软件进行测试。
+
+    采用如图 \ref{fig:task4topo} 类似的树状结构，中间会有一个瓶颈 45Mbps 的线路，每一个客户端会分配到 $25\frac{i}{n}$ Mbps 的带宽。
+    % 当 $n = 5$ 时，
+    客户端分配的带宽如表 \ref{tab:bandwidth}。框架实现代码见 \href{./task4.py}{\ttfamily task4.py}。
+
+    \noindent
+    \begin{minipage}{0.5\textwidth}
+        \begin{figure}[H]
+            \centering
+            \input{fig/task4topo.tex}
+            \caption{拓扑结构}\label{fig:task4topo}
+        \end{figure}
+    \end{minipage}
+    \begin{minipage}{0.5\textwidth}
+        \begin{table}[H]
+        \centering
+        \caption{分配带宽($n=5$)}\label{tab:bandwidth}
+        \begin{tabular}{ccccc}
+            \toprule
+                & h1 & h2 & h3 & h4\\
+            \midrule
+            带宽(Mbps) & 5 & 10 & 15 & 20 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+    \end{minipage}
+    \vspace*{5pt}
+    
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[symbolic x coords={h1,h2,h3,h4}, xtick=data,
+                ybar,ylabel={TCP Throughput (Mbps)},xlabel={Client},width=\linewidth,legend pos=north west]
+                 \addplot+ [] table[x=Host,y=Speed,] {reno_multi.dat};
+                 \pgfplotsset{cycle list shift=1};
+                 \addplot+ [] coordinates { (h1,5) (h2,10) (h3,15) (h4,20)};
+                \legend{Reno,Limit}
+                \end{axis}
+                \end{tikzpicture}                
+            \caption{Reno 多机测试}\label{fig:renom}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[symbolic x coords={h1,h2,h3,h4}, xtick=data,
+                ybar,xlabel={Client},width=\linewidth,legend pos=north west]
+                \pgfplotsset{cycle list shift=1};
+                 \addplot+ [] table[x=Host,y=Speed,] {vegas_multi.dat};
+                 \addplot+ [] coordinates { (h1,5) (h2,10) (h3,15) (h4,20)};
+                 \legend{Vegas,Limit}
+                \end{axis}
+                \end{tikzpicture}   
+            \caption{Vegas 多机测试}\label{fig:vegasm}
+        \end{minipage}
+    \end{figure}
+
+    图 \ref{fig:renom} 显示了 Reno 对于带宽分配上更加接近 Max-min Fairness，整体带宽为 40Mbps。而图 \ref{fig:vegasm} 显示 Vegas 更倾向于高带宽给高速度，提高了总体的带宽利用率（43Mbps）。
 
 
 \end{document}

@@ -67,18 +67,43 @@
 
     带宽进行$\pm $80 Mbps 测试，每 10 Mbps 分为一个间隔。
 
+    \begin{tikzpicture}
+        \begin{axis}[ymax=200]
+         \pgfplotstableread [] {bandwidth.dat}{\bw};
+         \addplot+ [] table[x=Bandwidth,y=reno,] {\bw};
+         \addplot+ [] table[x=Bandwidth,y=vegas,] {\bw};
+        \end{axis}
+    \end{tikzpicture}
+
     \subsection{延迟}
 
     延迟进行$\pm$ 200 ms 测试，每 40 ms 分一个间隔。
+
+    \begin{tikzpicture}
+        \begin{axis}[]
+         \pgfplotstableread [] {delay.dat}{\delay};
+         \addplot+ [] table[x=Delay,y=reno,] {\delay};
+         \addplot+ [] table[x=Delay,y=vegas,] {\delay};
+        \end{axis}
+    \end{tikzpicture}
 
     \subsection{丢包}
 
     丢包进行$-10\%\sim +50\%$ 测试，每 5\% 分一个间隔。
 
+    \begin{tikzpicture}
+        \begin{axis}[]
+         \pgfplotstableread [] {loss.dat}{\loss};
+         \addplot+ [] table[x=Loss,y=reno,] {\loss};
+         \addplot+ [] table[x=Loss,y=vegas,] {\loss};
+        \end{axis}
+    \end{tikzpicture}
+
     \section{多机分析}
 
     Construct a network with a bottleneck link shared by multiple pairs of senders and receivers. Study how these sender-receiver pairs share the bottleneck link.
 
+    由于 iPerf 不支持服务器并发服务，所以不能通过这种基准工具的方法进行测试。
 
 
 \end{document}

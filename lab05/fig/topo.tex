@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+    \tikzstyle{host}=[draw]
+    \tikzstyle{switch}=[draw]
+    \tikzstyle{connection}=[]
+    \tikzstyle{constr}=[right,font=\ttfamily\small]
+    
+\node (h1) [host] at (-0.5,0.5) {h1};
+\node (s1) [switch] at (1.5,0.5) {s1};
+\node (s3) [switch] at (3,2) {s3};
+\node (s2) [switch] at (4.5,0.5) {s2};
+\node (s4) [switch] at (3,-1) {s4};
+\node (h2) [host] at (6.5,0.5) {h2};
+\draw  (h1) edge (s1);
+\draw  (s1) edge (s3);
+\draw  (s3) edge (s2);
+\draw  (s2) edge (s4);
+\draw  (s4) edge (s1);
+\draw  (s2) edge (h2);
+\end{tikzpicture}

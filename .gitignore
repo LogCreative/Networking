@@ -13,3 +13,4 @@ cache/
 .fuse_*
 file*
 ref/
+ryu/

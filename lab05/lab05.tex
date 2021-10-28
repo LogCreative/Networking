@@ -11,4 +11,23 @@
     \vfill
     \clearpage
     \section{建立网络}
+    Set up the following network first:
+    
+    \hfill
+    \input{fig/topo.tex}
+
+    使用给出的示例代码。
+    \code{loopnet.py}
+
+    \section{定时切换}
+    Write an RYU controller that switches paths (h1-s1-s3-s2-h2 or h1-s1-s4-s2-h2) between h1 and h2 every 5 seconds. 
+
+    
+
+    \section{}
+    Write an RYU controller that uses both paths to forward packets from h1 to h2.
+
+    \section{}
+    Write an RYU controller that uses the first path (h1-s1-s3-s2-h2) for routing packets from h1 to h2 and uses the second path for backup. Specifically, when the first path experiences a link failure, the network should automatically switch to the second path without causing packet drop. (hint: consider using \verb"OFPGT_FF" (FF is short for ``fast failover'') to construct a group table)
+
 \end{document}

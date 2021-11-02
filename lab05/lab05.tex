@@ -70,13 +70,37 @@ flow timeout is exceeded (see 5.5).\cite{openflow13}
         \end{minipage}
     \end{figure}
 
-    由图 \ref{fig:task2topo} 可见，可以通过定时切换 \verb"s1" 和 \verb"s2" 的输出端口，来达到切换链路的功能。切换为 \verb"3" $\rightarrow$ \verb"1" 采用上面的链路，切换为 \verb"3" $\rightarrow$ \verb"2" 采用下面的链路。在图 \ref{fig:task2ping} 中可见是能够 \verb"ping" 通的。相关代码见附录 \ref{sec:per5}。
+    由图 \ref{fig:task2topo} 可见，可以通过定时切换 \verb"s1" 和 \verb"s2" 的输出端口，来达到切换链路的功能。切换为 \verb"3" $\rightarrow$ \verb"1" 采用上面的链路，切换为 \verb"3" $\rightarrow$ \verb"2" 采用下面的链路。由于有两个流会超时，但是临近的两个超时应当只改变一次端口状态，所以会设置一个状态变量用于避免不同步情况的设置延迟导致的丢包，如图 \ref{fig:pathstate} 所示。在图 \ref{fig:task2ping} 中可见是能够 \verb"ping" 通的。相关代码见附录 \ref{sec:per5}。
 
-    \section{}
+    \begin{figure}[H]
+        \centering
+        \input{fig/pathstate.tex}
+        \caption{状态机}\label{fig:pathstate}
+    \end{figure}
+
+    \section{使用双路}
     Write an RYU controller that uses both paths to forward packets from h1 to h2.
+
+\begin{quotation}
+    \textbf{select}: Execute one bucket in the group. Packets are processed by a single bucket in the
+group, based on a switch-computed selection algorithm (e.g. hash on some user-configured tuple or
+simple round robin). All configuration and state for the selection algorithm is external to OpenFlow.
+The selection algorithm should implement equal load sharing and can optionally be based on bucket
+weights. When a port specified in a bucket in a select group goes down, the switch may restrict bucket
+selection to the remaining set (those with forwarding actions to live ports) instead of dropping packets
+destined to that port. This behavior may reduce the disruption of a downed link or switch.\cite{openflow13}
+\end{quotation}
 
     \section{}
     Write an RYU controller that uses the first path (h1-s1-s3-s2-h2) for routing packets from h1 to h2 and uses the second path for backup. Specifically, when the first path experiences a link failure, the network should automatically switch to the second path without causing packet drop. (hint: consider using \verb"OFPGT_FF" (FF is short for ``fast failover'') to construct a group table)
+
+    \begin{quotation}
+        \textbf{fast failover}: Execute the first live bucket. Each action bucket is associated with a specific
+port and/or group that controls its liveness. The buckets are evaluated in the order defined by the
+group, and the first bucket which is associated with a live port/group is selected. This group type
+enables the switch to change forwarding without requiring a round trip to the controller. If no buckets
+are live, packets are dropped. This group type must implement a \emph{liveness mechanism}(see 6.5).\cite{openflow13}
+    \end{quotation}
 
     \bibliography{ref}
 

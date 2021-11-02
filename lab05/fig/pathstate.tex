@@ -1,0 +1,6 @@
+\begin{tikzpicture}
+\node[draw,circle] (v1) at (0,0) {0};
+\node[draw,circle] (v2) at (1.5,0) {1};
+\draw[bend left,->]  (v1) edge (v2);
+\draw[bend left,->]  (v2) edge node[below] {change}  (v1);
+\end{tikzpicture}

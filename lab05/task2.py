@@ -9,6 +9,8 @@ from ryu.lib.packet import in_proto as inet
 from ryu.ofproto import ofproto_v1_3
 
 pathport = 1
+pathstate = 1
+# 0 -> 1 -> 0 (change)
 
 class PeriodicSwtich(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -90,21 +92,18 @@ class PeriodicSwtich(app_manager.RyuApp):
             match = parser.OFPMatch(in_port=2)
             actions = [parser.OFPActionOutput(3)]
             self.add_flow(datapath, 2, match, actions)
-        # elif datapath.id == 3:
         elif datapath.id == 3 or datapath.id == 4:
-            # s3 
+            # s3 / s4
             match = parser.OFPMatch(in_port=1)
             actions = [parser.OFPActionOutput(2)]
             self.add_flow(datapath, 2, match, actions)
-        # elif datapath.id == 4:
-            # s4
             match = parser.OFPMatch(in_port=2)
             actions = [parser.OFPActionOutput(1)]
             self.add_flow(datapath, 2, match, actions)
 
     @set_ev_cls(ofp_event.EventOFPFlowRemoved, MAIN_DISPATCHER)
     def flow_removed_handler(self, ev):
-        global pathport
+        global pathport, pathstate
         
         msg = ev.msg
         datapath = msg.datapath
@@ -112,51 +111,13 @@ class PeriodicSwtich(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         if msg.reason == ofproto.OFPRR_HARD_TIMEOUT:
-            if datapath.id == 1:
-                pathport = 2 if pathport==1 else 1  
-                # change on pathport could only be invoked once.
+            pathstate += 1
+            if pathstate == 2: 
+                pathstate = 0
+                pathport = 2 if pathport==1 else 1
+                # change on pathport could only be invoked once in one round.
                 print('Swtich to port: ' + str(pathport))
             print('OFPFlowRemoved received: ' + str(datapath.id))
             match = parser.OFPMatch(in_port=3)
             actions = [parser.OFPActionOutput(pathport)]
             self.add_flow_timeout(datapath, 2, match, actions)
-
-    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
-    def _packet_in_handler(self, ev):
-        if ev.msg.msg_len < ev.msg.total_len:
-            self.logger.debug("packet truncated: only %s of %s bytes",
-                              ev.msg.msg_len, ev.msg.total_len)
-        msg = ev.msg
-        datapath = msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        in_port = msg.match['in_port']
-
-        pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
-
-        if eth.ethertype == ether_types.ETH_TYPE_LLDP:
-            # ignore lldp packet
-            return
-        dst = eth.dst
-        src = eth.src
-
-        actions = [parser.OFPActionOutput(pathport)]        
-
-        # install a flow to avoid packet_in next time
-        # if out_port != ofproto.OFPP_FLOOD:
-        match = parser.OFPMatch(in_port=in_port, eth_dst=dst, eth_src=src)
-        # verify if we have a valid buffer_id, if yes avoid to send both
-        # flow_mod & packet_out
-        if msg.buffer_id != ofproto.OFP_NO_BUFFER:
-            self.add_flow_timeout(datapath, 1, match, actions, msg.buffer_id)
-            return
-        else:
-            self.add_flow_timeout(datapath, 1, match, actions)
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
-                                  in_port=in_port, actions=actions, data=data)
-        datapath.send_msg(out)

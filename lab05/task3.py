@@ -13,7 +13,6 @@ class PeriodicSwtich(app_manager.RyuApp):
 
     def __init__(self, *_args, **_kwargs):
         super(PeriodicSwtich, self).__init__(*_args, **_kwargs)
-        self.mac_to_port = {}
     
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):

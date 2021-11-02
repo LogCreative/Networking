@@ -185,6 +185,13 @@
     \href{./#1}{\ttfamily #1}
 }
 
+\usetikzlibrary{positioning}
+% \tikzset{>=stealth}
+
+\newcommand{\tikzmark}[3][]
+  {\tikz[remember picture, baseline]
+    \node [anchor=base,#1](#2) {#3};}
+
 \usepackage{graphicx}
 \graphicspath{{img/}}
 

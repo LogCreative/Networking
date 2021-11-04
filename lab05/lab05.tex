@@ -16,7 +16,7 @@
     \hfill
     \input{fig/topo.tex}
 
-    使用给出的示例代码。
+    使用给出的示例代码。但是为了处理上的方便，将会指定链路连接的端口号。
     \code{loopnet.py}
 
     \section{定时切换}
@@ -89,6 +89,8 @@ weights. When a port specified in a bucket in a select group goes down, the swit
 selection to the remaining set (those with forwarding actions to live ports) instead of dropping packets
 destined to that port. This behavior may reduce the disruption of a downed link or switch.\cite{openflow13}
 \end{quotation}
+
+
 
     \section{}
     Write an RYU controller that uses the first path (h1-s1-s3-s2-h2) for routing packets from h1 to h2 and uses the second path for backup. Specifically, when the first path experiences a link failure, the network should automatically switch to the second path without causing packet drop. (hint: consider using \verb"OFPGT_FF" (FF is short for ``fast failover'') to construct a group table)

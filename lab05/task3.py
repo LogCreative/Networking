@@ -38,24 +38,24 @@ class PeriodicSwtich(app_manager.RyuApp):
             datapath.send_msg(req)
 
             match = parser.OFPMatch(in_port=3)
-            self.add_flow_group(datapath, 1, match, group_id)
+            self.add_flow_group(datapath, 10, match, group_id)
 
             # return flow s1(s2) -> h1
             # 2 possible flows: from port 1, from port 2.
             match = parser.OFPMatch(in_port=1)
             actions = [parser.OFPActionOutput(3)]
-            self.add_flow(datapath, 2, match, actions)
+            self.add_flow(datapath, 10, match, actions)
             match = parser.OFPMatch(in_port=2)
             actions = [parser.OFPActionOutput(3)]
-            self.add_flow(datapath, 2, match, actions)
+            self.add_flow(datapath, 10, match, actions)
         elif datapath.id == 3 or datapath.id == 4:
             # s3 / s4
             match = parser.OFPMatch(in_port=1)
             actions = [parser.OFPActionOutput(2)]
-            self.add_flow(datapath, 2, match, actions)
+            self.add_flow(datapath, 10, match, actions)
             match = parser.OFPMatch(in_port=2)
             actions = [parser.OFPActionOutput(1)]
-            self.add_flow(datapath, 2, match, actions)
+            self.add_flow(datapath, 10, match, actions)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto

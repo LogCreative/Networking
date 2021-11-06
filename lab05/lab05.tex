@@ -141,7 +141,7 @@ are live, packets are dropped. This group type must implement a \emph{liveness m
     \end{verbatim}
     这是因为 Fast Failover 的要求就是当一个链路断开的时候能够使用另一个链路，而这个时候一条链路的权值会变成 0，如果赋予权值就会产生冲突。
 
-    \codeseg{task4.py}{26}{34}
+    % \codeseg{task4.py}{26}{34}
 
     测试方法如下，将 \verb"ping" 的数据写入文件，同时切断某条链路的连接查看反应。
     \begin{lstlisting}[style=commandshell]
@@ -160,7 +160,9 @@ link s2 s3 down\end{lstlisting}
         % \code{pingtest.txt}
     % \end{minipage}
 
-    
+    \verb"EventOFPortStatus" 可以检测链路改变。
+
+    \codeseg{../ryu/ryu/ofproto/ofproto\_v1\_3\_parser.py}{2521}{2537}
 
     \bibliography{ref}
 

@@ -127,6 +127,39 @@ enables the switch to change forwarding without requiring a round trip to the co
 are live, packets are dropped. This group type must implement a \emph{liveness mechanism}(see 6.5).\cite{openflow13}
     \end{quotation}
 
+    将组表的构造参数变更为 \verb"OFPGT_FF"，并分别监视 1 号和 2 号端口。在 Mininet CLI 中输入
+    \begin{lstlisting}[style=commandshell]
+    link s1 s3 down\end{lstlisting}
+    断开 s1 和 s3 之间的链路\cite{mininetdown}。
+
+    在前一个任务的代码上更改参数。但需要注意，此时输出组不能被设定权重。否则会报错
+    \begin{verbatim}
+|-- type: OFPET_BAD_ACTION(2)
+|-- code: OFPBAC_BAD_OUT_GROUP(9)
+`-- data: version=0x4, msg_type=0xe, msg_len=0x50, xid=0x8b06b84c
+    `-- msg_type: OFPT_FLOW_MOD(14)       
+    \end{verbatim}
+    这是因为 Fast Failover 的要求就是当一个链路断开的时候能够使用另一个链路，而这个时候一条链路的权值会变成 0，如果赋予权值就会产生冲突。
+
+    \codeseg{task4.py}{26}{34}
+
+    测试方法如下，将 \verb"ping" 的数据写入文件，同时切断某条链路的连接查看反应。
+    \begin{lstlisting}[style=commandshell]
+h1 ping h2 -c 20 > pingtest.txt &
+link s1 s3 down
+link s2 s3 down\end{lstlisting}
+
+    \code{pingtest.txt}
+
+    我们看到第 3 号包和第 6 号包之间出现了丢包。而且现在的版本如果不将另一条链路（\verb"s2"和\verb"s3"之间）也切断的话，会导致\verb"s2"不知道这条链路已经切断，从而不可达。
+    
+    % \begin{minipage}{0.46\textwidth}
+        \code{pingfail.txt}
+    % \end{minipage}
+    % \begin{minipage}{0.46\textwidth}
+        % \code{pingtest.txt}
+    % \end{minipage}
+
     
 
     \bibliography{ref}

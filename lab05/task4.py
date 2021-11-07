@@ -8,11 +8,11 @@ from ryu.lib.packet import ether_types, ethernet
 from ryu.lib.packet import in_proto as inet
 from ryu.ofproto import ofproto_v1_3
 
-class PeriodicSwtich(app_manager.RyuApp):
+class FFSwtich(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *_args, **_kwargs):
-        super(PeriodicSwtich, self).__init__(*_args, **_kwargs)
+        super(FFSwtich, self).__init__(*_args, **_kwargs)
     
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -98,20 +98,4 @@ class PeriodicSwtich(app_manager.RyuApp):
         mod = parser.OFPFlowMod(datapath=datapath, priority=priority, match=match, instructions=inst)
         datapath.send_msg(mod)
 
-    @set_ev_cls(ofp_event.EventOFPPortStatus, MAIN_DISPATCHER)
-    def port_status_handler(self, ev):
-        msg = ev.msg
-        dp = msg.datapath
-        ofp = dp.ofproto
-
-        if msg.reason == ofp.OFPPR_ADD:
-            reason = 'ADD'
-        elif msg.reason == ofp.OFPPR_DELETE:
-            reason = 'DELETE'
-        elif msg.reason == ofp.OFPPR_MODIFY:
-            reason = 'MODIFY'
-        else:
-            reason = 'unknown'
-
-        self.logger.debug('OFPPortStatus received: reason=%s desc=%s',
-                            reason, msg.desc)
+    

@@ -8,11 +8,11 @@ from ryu.lib.packet import ether_types, ethernet
 from ryu.lib.packet import in_proto as inet
 from ryu.ofproto import ofproto_v1_3
 
-class PeriodicSwtich(app_manager.RyuApp):
+class BalancedSwtich(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *_args, **_kwargs):
-        super(PeriodicSwtich, self).__init__(*_args, **_kwargs)
+        super(BalancedSwtich, self).__init__(*_args, **_kwargs)
     
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):

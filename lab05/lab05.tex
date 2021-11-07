@@ -1,5 +1,6 @@
 %&"../net"
 \endofdump
+\usetikzlibrary{quotes}
 \tikzexternalize[prefix=cache/]{lab05}
 % https://shimo.im/docs/xJTTRDH6YrkcvvTG/read
 \begin{document}
@@ -141,7 +142,9 @@ are live, packets are dropped. This group type must implement a \emph{liveness m
     \end{verbatim}
     这是因为 Fast Failover 的要求就是当一个链路断开的时候能够使用另一个链路，而这个时候一条链路的权值会变成 0，如果赋予权值就会产生冲突。
 
-    % \codeseg{task4.py}{26}{34}
+    \codeseg{task4.py}{39}{49}
+
+    \codeseg{task4.py}{103}{103}
 
     测试方法如下，将 \verb"ping" 的数据写入文件，同时切断某条链路的连接查看反应。
     \begin{lstlisting}[style=commandshell]
@@ -160,9 +163,73 @@ link s2 s3 down\end{lstlisting}
         % \code{pingtest.txt}
     % \end{minipage}
 
-    \verb"EventOFPortStatus" 可以检测链路改变。
+    解决丢包问题这里主要有三种方案：
+    \begin{enumerate}
+        \item 改变当前拓扑结构，在 s3 和 s4 之间添加链路。
+        \item 通知另一侧交换机改变流表，关闭受损的链路。
+        \item 调度采用最小生成树算法，改变拓扑时即重新计算。
+    \end{enumerate}
+
+    第一种在 B4 中叫做 \emph{sidelink}\cite{Hong2018}，但是这种方法的缺点很明显：要改变拓扑，如果地理位置较远这种方法是不值得的，而且对于新加入的备用链路，出口处的传包如何安排流表也是问题：如果按照预期受损，单一转发方向还好，如图 \ref{fig:topoback}。如果只指向一个方向，那么另一侧链路受损时将不可达，如图 \ref{fig:topoback2}。如果尝试对 s4 的 3 号端口采用 FF 转发的话，由于优先的那个端口并不是断开的，所以还是会传输，\textbf{并不能避免丢包}。（FF仅适用于端口完全断开连接）
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \input{fig/topoback}
+            \caption{正常备用转发}\label{fig:topoback}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \input{fig/topoback2}
+            \caption{备用不可达}\label{fig:topoback2}
+        \end{minipage}
+    \end{figure}
+
+    第三种方法不是题面提示要求我们做的（需要使用 FF）。
+
+    \textbf{下面主要采用第二种方法。}\verb"EventOFPortStatus" 可以检测链路改变。
 
     \codeseg{../ryu/ryu/ofproto/ofproto\_v1\_3\_parser.py}{2521}{2537}
+
+    相关代码见附录 \ref{sec:backup}。在该事件中针对 \verb"MODIFY" 进行处理，采用一个计时器来跟踪临近的识别操作（1s 为阈值），并排除开始的网络建立阶段，以及对 s3 和 s4 建立 FF 流组，如图 \ref{fig:toponormal}。之后采用类内的变量来确定断开的链路是哪个链路，并通知对应的路由改变流表。注意由于需要通知不同的路由，需要得到当前网络的拓扑结构，启动时需要添加 \verb"--observe-links" 参数发现路由。
+
+    \begin{lstlisting}[style=commandshell]
+ryu-manager --observe-links task4.py\end{lstlisting}
+
+    如图 \ref{fig:topobreak}，如果遇到断开包会原路返回（蓝色的流），而且此时 s2 已经不再使用 FF 组，而是直接转发来自 3 端口到 2 端口，以及直接将 1 端口转发到 2 端口以收取残留的原路返回包。
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \input{fig/toponormal}
+            \caption{正常链路流表}\label{fig:toponormal}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \input{fig/topobreak}
+            \caption{断开时流表与转发}\label{fig:topobreak}
+        \end{minipage}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{task4state}
+            \caption{状态改变}\label{fig:task4state}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{task4cli}
+            \caption{断开链路}\label{fig:task4cli}
+        \end{minipage}
+    \end{figure}
+
+    经过测试，这种方案将不会丢包。
+
+    \code{pingnew.txt}
 
     \bibliography{ref}
 
@@ -175,5 +242,9 @@ link s2 s3 down\end{lstlisting}
     \section{使用双路代码}\label{sec:balance}
 
     \code{task3.py}
+
+    \section{断路备用代码}\label{sec:backup}
+
+    \code{task4.py}
 
 \end{document}

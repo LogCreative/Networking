@@ -17,4 +17,11 @@
 \draw  (s2) edge ["2" near start, "2" near end] (s4);
 \draw  (s4) edge ["1" near start, "2" near end] (s1);
 \draw  (s2) edge ["3" near start, "1" near end] (h2);
+\draw[line width=1pt]  plot[smooth, tension=.7] coordinates {(-0.5,1) (1,1)  (2.5,2.5) (3.5,2.5) (5,1) (6.5,1)};
+\draw [->,dashed,line width=1pt] plot[smooth, tension=.7] coordinates {(1,1) (2,-0.5)};
+\draw [->,dashed,line width=1pt]  plot[smooth, tension=.7] coordinates {(5,1) (4,-0.5)};
+\node [red, rotate=30] at (1.5,1) {$\leftarrow$};
+\node [red, rotate=-30] at (1.5,0) {$\leftarrow$};
+\node [red, rotate=-30] at (4.5,1) {$\rightarrow$};
+\node [red, rotate=30] at (4.5,0) {$\rightarrow$};
 \end{tikzpicture}

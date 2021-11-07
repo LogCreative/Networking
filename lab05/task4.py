@@ -8,6 +8,9 @@ from ryu.lib.packet import ether_types, ethernet
 from ryu.lib.packet import in_proto as inet
 from ryu.ofproto import ofproto_v1_3
 
+from ryu.topology.api import get_switch, get_link
+from ryu.topology import event, switches
+
 class FFSwtich(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
@@ -48,11 +51,12 @@ class FFSwtich(app_manager.RyuApp):
 
             actions1 = [parser.OFPActionOutput(1)]
             actions2 = [parser.OFPActionOutput(2)]
+            actions3 = [parser.OFPActionOutput(3)]
 
             # fail over for port 1
             buckets1 = [
                 parser.OFPBucket(watch_port=2, actions=actions2),
-                parser.OFPBucket(watch_port=1, actions=actions1)]
+                parser.OFPBucket(watch_port=3, actions=actions3)]
             group_id = 3
             self.req_group(datapath, group_id, buckets1)
             match = parser.OFPMatch(in_port=1)
@@ -61,11 +65,20 @@ class FFSwtich(app_manager.RyuApp):
             # fail over for port 2
             buckets2 = [
                 parser.OFPBucket(watch_port=1, actions=actions1),
-                parser.OFPBucket(watch_port=2, actions=actions2)]
+                parser.OFPBucket(watch_port=3, actions=actions3)]
             group_id = 4
             self.req_group(datapath, group_id, buckets2)
             match = parser.OFPMatch(in_port=2)
             self.add_flow_group(datapath, 10, match, group_id)
+
+            # get input from port 3
+            buckets3 = [
+                parser.OFPBucket(watch_port=1, actions=actions1),
+                parser.OFPBucket(watch_port=2, actions=actions2)]
+            group_id = 5
+            self.req_group(datapath, group_id, buckets3)
+            match = parser.OFPMatch(in_port=3)
+            self.add_flow_group(datapath, 20, match, group_id)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto
@@ -98,4 +111,14 @@ class FFSwtich(app_manager.RyuApp):
         mod = parser.OFPFlowMod(datapath=datapath, priority=priority, match=match, instructions=inst)
         datapath.send_msg(mod)
 
-    
+    # @set_ev_cls(ofp_event.EventOFPPortStatus, MAIN_DISPATCHER)
+    # def port_status_handler(self, ev):
+    #     msg = ev.msg
+    #     datapath = msg.datapath
+    #     ofp = datapath.ofproto    
+    #     if msg.reason == ofp.OFPPR_MODIFY:
+    #         print("port modified detected: " + str(datapath.id))
+    #         switch_list = get_switch(self)
+    #         print(switch_list)
+    #         link_list = get_link(self)
+    #         print(link_list)

@@ -1,4 +1,4 @@
-# 3. Write an RYU controller that uses both paths to forward packets from h1 to h2.
+# 4. Write an RYU controller that uses the first path (h1-s1-s3-s2-h2) for routing packets from h1 to h2 and uses the second path for backup. Specifically, when the first path experiences a link failure, the network should automatically switch to the second path without causing packet drop. (hint: consider using \verb"OFPGT_FF" (FF is short for ``fast failover'') to construct a group table)
 
 from ryu.base import app_manager
 from ryu.controller import ofp_event
@@ -10,12 +10,22 @@ from ryu.ofproto import ofproto_v1_3
 
 from ryu.topology.api import get_switch, get_link
 from ryu.topology import event, switches
+from time import time
+
+LEFT = 0
+RIGHT = 1
+UPPER = 2
+BOTTOM = 3
 
 class FFSwtich(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *_args, **_kwargs):
         super(FFSwtich, self).__init__(*_args, **_kwargs)
+        self.lr = -1
+        self.ub = -1
+        self.prev_time = -1
+        self.change_state = 0
     
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -71,15 +81,6 @@ class FFSwtich(app_manager.RyuApp):
             match = parser.OFPMatch(in_port=2)
             self.add_flow_group(datapath, 10, match, group_id)
 
-            # get input from port 3
-            buckets3 = [
-                parser.OFPBucket(watch_port=1, actions=actions1),
-                parser.OFPBucket(watch_port=2, actions=actions2)]
-            group_id = 5
-            self.req_group(datapath, group_id, buckets3)
-            match = parser.OFPMatch(in_port=3)
-            self.add_flow_group(datapath, 20, match, group_id)
-
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -111,14 +112,64 @@ class FFSwtich(app_manager.RyuApp):
         mod = parser.OFPFlowMod(datapath=datapath, priority=priority, match=match, instructions=inst)
         datapath.send_msg(mod)
 
-    # @set_ev_cls(ofp_event.EventOFPPortStatus, MAIN_DISPATCHER)
-    # def port_status_handler(self, ev):
-    #     msg = ev.msg
-    #     datapath = msg.datapath
-    #     ofp = datapath.ofproto    
-    #     if msg.reason == ofp.OFPPR_MODIFY:
-    #         print("port modified detected: " + str(datapath.id))
-    #         switch_list = get_switch(self)
-    #         print(switch_list)
-    #         link_list = get_link(self)
-    #         print(link_list)
+    @set_ev_cls(ofp_event.EventOFPPortStatus, MAIN_DISPATCHER)
+    def port_status_handler(self, ev):
+        msg = ev.msg
+        datapath = msg.datapath
+        ofproto = datapath.ofproto    
+        if msg.reason == ofproto.OFPPR_MODIFY:
+            if self.prev_time < 0 or time()-self.prev_time <= 1:
+                # not recorded: at the build stage.
+                # it is too close as the same op: don't make duplicated work.
+                self.prev_time = time() # refresh time and move on.
+                return
+            # regard it as different op.
+            # will not refresh the previous time 
+            # as we need to locate the location of the broken link.
+            if datapath.id == 1:
+                # left
+                self.lr = LEFT
+            elif datapath.id == 2:
+                # right
+                self.lr = RIGHT
+            elif datapath.id == 3:
+                # upper link
+                self.ub = UPPER
+            elif datapath.id == 4:
+                # bottom link
+                self.ub = BOTTOM
+            self.change_state = self.change_state + 1 if self.change_state < 3 else 0
+            print(str(self.lr) + "," + str(self.ub) + "," + str(self.change_state))
+            if self.change_state == 0:
+                # make the change.
+                # the information is efficient enough to make adjustment.
+                switch_list = get_switch(self)
+                if self.lr == LEFT:
+                    # notify s2
+                    target_switch = switch_list[1]
+                else:
+                    # notify s1
+                    target_switch = switch_list[0]
+                dp = target_switch.dp
+                ofp = datapath.ofproto
+                parser = dp.ofproto_parser
+                if self.ub == UPPER:
+                    # use the bottom link
+                    # port1 -> port2
+                    match = parser.OFPMatch(in_port=1)
+                    actions = [parser.OFPActionOutput(2)]
+                    self.add_flow(dp, 20, match, actions)
+                    # port3 -> port2
+                    match = parser.OFPMatch(in_port=3)
+                    actions = [parser.OFPActionOutput(2)]
+                    self.add_flow(dp, 20, match, actions)
+                else:
+                    # use the upper link
+                    # port2 -> port1
+                    match = parser.OFPMatch(in_port=2)
+                    actions = [parser.OFPActionOutput(1)]
+                    self.add_flow(dp, 20, match, actions)
+                    # port3 -> port1
+                    match = parser.OFPMatch(in_port=3)
+                    actions = [parser.OFPActionOutput(1)]
+                    self.add_flow(dp, 20, match, actions)

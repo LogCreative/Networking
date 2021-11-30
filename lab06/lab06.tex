@@ -13,10 +13,27 @@
     \clearpage
     \section{建立网络}
 
-    
+    先克隆虚拟机\footnote{感谢 VMWare Workstation 的快照技术，如果重新启动虚拟机，网络配置将会让其无法上网，必须返回原点重新配置。}，然后分别在 VM1 和 VM2 上分别运行下面的脚本，结果如图 \ref{fig:setup} 所示：
+
+    \code[language=bash]{vm1.sh}
+    \code[language=bash]{vm2.sh}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{setup}
+        \caption{配置环境}\label{fig:setup}
+    \end{figure}
 
     \section{Wireshark 抓包}
     Use Wireshark to monitor the interfaces s1 and eth0, and describe your findings.
+
+    使用 Wireshark 抓取传输时数据，得到如图 \ref{fig:wireshark} 所示的包。外层为 UDP 报文，显示的实际的 IP 地址；中间为 VXLAN 层；再内侧为 Overlay 的 ICMP 报文，显示的是 Overlay IP 地址。
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{wireshark}
+        \caption{Wireshark 抓包}\label{fig:wireshark}
+    \end{figure}
 
     \section{iperf 测试}
     Use iperf to test the network bandwidth between the two virtual machines 
@@ -26,6 +43,14 @@
     \end{itemize}
 
     Compare the above results and explain the reason. 
+
+    如果不调整 MTU 会导致从 h1 ping 出去的时候只有两个包被接收了，之后会提示“没有可用的缓冲区空间”，如图 \ref{fig:nobuffer} 所示。
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\linewidth]{nobuffer}
+        \caption{没有可用的缓冲区空间}\label{fig:nobuffer}
+    \end{figure}
 
     \section{ping 测试}
     Similar to Q2, use ping to test the network latency and analyze your results.

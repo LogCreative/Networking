@@ -1,0 +1,33 @@
+%&"../net"
+\endofdump
+\tikzexternalize[prefix=cache/]{lab06}
+\begin{document}
+    \title{Overlay Network and VXLAN}
+    \maketitle
+    \tableofcontents
+    \vfill
+    An overlay network can be thought of as a computer network on top of another network. 
+
+    VXLAN is often described as an overlay technology because it allows to stretch Layer 2 connections over an intervening Layer 3 network by encapsulating (tunneling) Ethernet frames in a VXLAN packet that includes IP addresses.
+    \vfill
+    \clearpage
+    \section{建立网络}
+
+    
+
+    \section{Wireshark 抓包}
+    Use Wireshark to monitor the interfaces s1 and eth0, and describe your findings.
+
+    \section{iperf 测试}
+    Use iperf to test the network bandwidth between the two virtual machines 
+    \begin{itemize}
+        \item Test the bandwidth between 192.168.56.127 and 192.168.56.128
+        \item Test the bandwidth between 10.0.0.1/10.0.0.2/10.0.0.101 and 10.0.0.102 (hint: you may need to specify a reasonable MTU size in order for your iperf to work in this case. Please also think about why.)
+    \end{itemize}
+
+    Compare the above results and explain the reason. 
+
+    \section{ping 测试}
+    Similar to Q2, use ping to test the network latency and analyze your results.
+    
+\end{document}

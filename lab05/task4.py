@@ -48,6 +48,13 @@ class FFSwtich(app_manager.RyuApp):
             match = parser.OFPMatch(in_port=3)
             self.add_flow_group(datapath, 10, match, group_id)
 
+            match_src = '10.0.0.1' if datapath.id == 1 else '10.0.0.2'
+            match_dst = '10.0.0.2' if datapath.id == 1 else '10.0.0.1'
+            match = parser.OFPMatch(in_port=1,eth_type=ether_types.ETH_TYPE_IP,ipv4_src=match_src,ipv4_dst=match_dst)
+            self.add_flow(datapath,15,match,actions2)
+            match = parser.OFPMatch(in_port=2, eth_type=ether_types.ETH_TYPE_IP,ipv4_src=match_src,ipv4_dst=match_dst)
+            self.add_flow(datapath,15,match,actions1)
+
             # return flow s1(s2) -> h1
             # 2 possible flows: from port 1, from port 2.
             match = parser.OFPMatch(in_port=1)
@@ -154,21 +161,11 @@ class FFSwtich(app_manager.RyuApp):
                 ofp = datapath.ofproto
                 parser = dp.ofproto_parser
                 if self.ub == UPPER:
-                    # use the bottom link
-                    # port1 -> port2
-                    match = parser.OFPMatch(in_port=1)
-                    actions = [parser.OFPActionOutput(2)]
-                    self.add_flow(dp, 20, match, actions)
                     # port3 -> port2
                     match = parser.OFPMatch(in_port=3)
                     actions = [parser.OFPActionOutput(2)]
                     self.add_flow(dp, 20, match, actions)
                 else:
-                    # use the upper link
-                    # port2 -> port1
-                    match = parser.OFPMatch(in_port=2)
-                    actions = [parser.OFPActionOutput(1)]
-                    self.add_flow(dp, 20, match, actions)
                     # port3 -> port1
                     match = parser.OFPMatch(in_port=3)
                     actions = [parser.OFPActionOutput(1)]

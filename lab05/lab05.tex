@@ -144,7 +144,7 @@ are live, packets are dropped. This group type must implement a \emph{liveness m
 
     \codeseg{task4.py}{39}{49}
 
-    \codeseg{task4.py}{103}{103}
+    \codeseg{task4.py}{110}{110}
 
     测试方法如下，将 \verb"ping" 的数据写入文件，同时切断某条链路的连接查看反应。
     \begin{lstlisting}[style=commandshell]
@@ -192,7 +192,9 @@ link s2 s3 down\end{lstlisting}
 
     \codeseg{../ryu/ryu/ofproto/ofproto\_v1\_3\_parser.py}{2521}{2537}
 
-    相关代码见附录 \ref{sec:backup}。在该事件中针对 \verb"MODIFY" 进行处理，采用一个计时器来跟踪临近的识别操作（1s 为阈值），并排除开始的网络建立阶段，以及对 s3 和 s4 建立 FF 流组，如图 \ref{fig:toponormal}。之后采用类内的变量来确定断开的链路是哪个链路，并通知对应的路由改变流表。注意由于需要通知不同的路由，需要得到当前网络的拓扑结构，启动时需要添加 \verb"--observe-links" 参数发现路由。
+    相关代码见附录 \ref{sec:backup}。首先会在 s1 和 s2 设立两条\textbf{备用转发规则}（更高优先级）：如果出现了从 1 号端口回传的包，如果目的地不是该侧的 IP，那么就会被转发到 2 号端口；对 2 号端口也进行同样的设定。
+    
+    之后在 \verb"EventOFPortStatus" 事件中针对 \verb"MODIFY" 进行处理，采用一个计时器来跟踪临近的识别操作（1s 为阈值），并排除开始的网络建立阶段，以及对 s3 和 s4 建立 FF 流组，如图 \ref{fig:toponormal}。之后采用类内的变量来确定断开的链路是哪个链路，并通知对应的路由\textbf{改变流表}。注意由于需要通知不同的路由，需要得到当前网络的拓扑结构，启动时需要添加 \verb"--observe-links" 参数发现路由。
 
     \begin{lstlisting}[style=commandshell]
 ryu-manager --observe-links task4.py\end{lstlisting}

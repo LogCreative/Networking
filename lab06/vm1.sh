@@ -1,8 +1,8 @@
 #!/bin/bash
 
 sudo mn
-h1 ifconfig h1-eth0 mtu 1450
-h2 ifconfig h2-eth0 mtu 1450
+h1 ifconfig h1-eth0 mtu 1440
+h2 ifconfig h2-eth0 mtu 1440
 
 # ======
 
@@ -14,6 +14,6 @@ sudo ifconfig br1 192.168.4.131/24 up
 
 sudo ovs-vsctl add-port s1 vxlan0 -- set interface vxlan0 type=vxlan options:remote_ip=192.168.4.132
 
-sudo ifconfig vxlan_sys_4789 mtu 1450
-sudo ifconfig s1-eth1 mtu 1450
-sudo ifconfig s1-eth2 mtu 1450
+sudo ifconfig vxlan_sys_4789 mtu 1440
+sudo ifconfig s1-eth1 mtu 1440
+sudo ifconfig s1-eth2 mtu 1440

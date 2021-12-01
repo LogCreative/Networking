@@ -8,7 +8,7 @@ sudo ifconfig ens33 0 up
 sudo ovs-vsctl add-port br1 ens33
 sudo ifconfig br1 192.168.4.132/24 up
 
-sudo ovs-vsctl add-port s1 vxlan0 -- set interface vxlan0 type=vxlan options:remote_ip=192.168.4.131
+sudo ovs-vsctl add-port s1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.4.131
 
 # ====clean====
 # sudo ovs-vsctl del-br br1

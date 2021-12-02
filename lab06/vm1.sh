@@ -12,7 +12,7 @@ sudo ifconfig ens33 0 up
 sudo ovs-vsctl add-port br1 ens33
 sudo ifconfig br1 192.168.4.131/24 up
 
-sudo ovs-vsctl add-port s1 vxlan0 -- set interface vxlan0 type=vxlan options:remote_ip=192.168.4.132
+sudo ovs-vsctl add-port s1 vxlan0 -- set interface vxlan0 type=vxlan options:remote_ip=192.168.4.132 option:key=5566 ofport_request=9
 
 sudo ifconfig vxlan_sys_4789 mtu 1440
 sudo ifconfig s1-eth1 mtu 1440

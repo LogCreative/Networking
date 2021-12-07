@@ -2,7 +2,7 @@
 \endofdump
 \tikzexternalize[prefix=cache/]{lab06}
 \begin{document}
-    \title{Overlay Network and VXLAN}
+    \title{Overlay Network and VXLAN (With Bug)}
     \maketitle
     \tableofcontents
     \vfill
@@ -13,21 +13,30 @@
     \clearpage
     \section{建立网络}
 
-    先克隆虚拟机\footnote{感谢 VMWare Workstation 的快照技术，如果重新启动虚拟机，网络配置将会让其无法上网，必须返回原点重新配置。}，然后分别在 VM1 和 VM2 上分别运行下面的脚本，得到如图 \ref{fig:topo} 所示的拓扑结构，结果如图 \ref{fig:setup} 所示：
+    先克隆虚拟机\footnote{感谢 VMWare Workstation 的快照技术，如果重新启动虚拟机，网络配置将会让其无法上网，必须返回原点重新配置。}，然后分别在 VM1 和 VM2 上分别运行 \href{run:vm1topo.py}{vm1topo.py} 和 \href{run:vm2topo.py}{vm2topo.py}（与 \verb"vm1topo.py" 类似，略过），得到如图 \ref{fig:toposym} 所示的拓扑结构，注意拓扑已经与教程中
+    % 结果如图 \ref{fig:setup} 所示：
 
-    \code[language=bash]{vm1.sh}
-    \code[language=bash]{vm2.sh}
+    % \code[language=bash]{vm1.sh}
+    % \code[language=bash]{vm2.sh}
+
+    \code{vm1topo.py}
+
+    % \begin{figure}[H]
+    %     \centering
+    %     \includegraphics[width=\linewidth]{setup}
+    %     \caption{配置环境}\label{fig:setup}
+    % \end{figure}
+
+    % \begin{figure}[H]
+    %     \centering
+    %     \input{fig/topo.tex}
+    %     \caption{拓扑结构}\label{fig:topo}
+    % \end{figure}
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\linewidth]{setup}
-        \caption{配置环境}\label{fig:setup}
-    \end{figure}
-
-    \begin{figure}[H]
-        \centering
-        \input{fig/topo.tex}
-        \caption{拓扑结构}\label{fig:topo}
+        \input{fig/toposym.tex}
+        \caption{拓扑结构}\label{fig:toposym}
     \end{figure}
 
     \section{Wireshark 抓包}
@@ -50,15 +59,47 @@
 
     Compare the above results and explain the reason. 
 
-    如果不调整 MTU 会导致从 h1 ping 出去的时候只有两个包被接收了，之后会提示“没有可用的缓冲区空间”，如图 \ref{fig:nobuffer} 所示。这是因为 VXLAN 会添加 50 -- 54 Bytes 的额外头部，导致超出 MTU 限制。
+    % \begin{figure}[H]
+    %     \centering
+    %     \includegraphics[width=0.7\linewidth]{nobuffer}
+    %     \caption{没有可用的缓冲区空间}\label{fig:nobuffer}
+    % \end{figure}
 
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.7\linewidth]{nobuffer}
-        \caption{没有可用的缓冲区空间}\label{fig:nobuffer}
-    \end{figure}
+    % 使用控制器\cite{vxlannew}
 
     \section{ping 测试}
     Similar to Q2, use ping to test the network latency and analyze your results.
+
+    如果不调整 MTU 会导致从 h1 ping 出去的时候只有两个包被接收了，之后会提示“没有可用的缓冲区空间”，如图 \ref{fig:wiresharkh1ping} 所示。这是因为 VXLAN 会添加 50 -- 54 Bytes 的额外头部，导致超出 MTU 限制。现在的 bug 是，\textbf{已经调整 MTU 后，仍然无法 ping 通。}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{wiresharkh1ping}
+        \caption{无缓冲区空间抓包情况}\label{fig:wiresharkh1ping}
+    \end{figure}
+
+    更进一步的测试表明，同一条路径上 \verb"s1-h3"，如果是 \verb"s1" 为主动ping方，可以ping通，而如果是 \verb"h3" 为主动方，则ping不通，如图 \ref{fig:pingeachother} 所示。\textbf{疑似子网内的主机无法被 VxLAN 识别以正确发包，或者有机制缺陷，导致只能ping通两次而没有释放缓冲区。}
     
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{pingeachother}
+        \caption{同一路径不同发送主动方测试}\label{fig:pingeachother}
+    \end{figure}
+
+    下面暂时解决方法是直接将服务请求方全部放在交换机上。以及可能会手写控制器\cite{vxlannew}。
+
+    \begin{table}[H]
+        \centering
+        \caption{运行环境}\label{tab:env}
+        \begin{tabular}{>{\bfseries}cl}
+            \toprule
+            操作系统 & Ubuntu 18.04.5 \\
+            虚拟软件 & VMWare Workstation \\
+            克隆设置 & 链接克隆与完整克隆皆已测试 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    \bibliography{ref}
+
 \end{document}

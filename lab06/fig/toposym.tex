@@ -1,0 +1,33 @@
+\begin{tikzpicture}[node distance=0.5cm]
+\tikzstyle{host}=[draw]
+\tikzstyle{switch}=[draw]
+\tikzstyle{connection}=[]
+\tikzstyle{constr}=[right,font=\ttfamily\small]
+\draw  (-5,2) rectangle (2,-2.5);
+\draw  (3,2) rectangle (10,-2.5);
+\node [switch] (v2) at (0.5,-0.5) {s1};
+\node [below of=v2,font=\ttfamily] {10.0.0.101};
+\node [host] (v1) at (-4,0.5) {h1};
+\node [below of=v1,font=\ttfamily] {10.0.0.1};
+\node [host] (v3) at (-4,-1.5) {h2};
+\node [below of=v3,font=\ttfamily] {10.0.0.2};
+\draw  (v1) edge (v2);
+\draw  (v3) edge (v2);
+\node [host] (v4) at (4.5,-0.5) {s2};
+\node [below of=v4,font=\ttfamily] {10.0.0.102};
+\draw  (v2) edge (v4);
+\node[font=\ttfamily] at (6.5,1.5) {192.168.4.132};
+\node[font=\ttfamily] at (-1,1.5) {192.168.4.131};
+\node[font=\small] at (4,0) {vxlan0};
+\node[font=\small] at (1,0) {vxlan0};
+\node[font=\small] at (-1,0) {s1-eth1};
+\node[font=\small] at (-3,0.5) {h1-eth0};
+\node[font=\small] at (-3,-1.5) {h2-eth0};
+\node[font=\small] at (-1,-1) {s1-eth2};
+\node [host] (v5) at (9,0.5) {h3};
+\node [host] (v6) at (9,-1.5) {h4};
+\draw  (v4) edge (v5);
+\draw  (v4) edge (v6);
+\node[below of=v5,font=\ttfamily] {10.0.0.3};
+\node[below of=v6,font=\ttfamily] {10.0.0.4};
+\end{tikzpicture}

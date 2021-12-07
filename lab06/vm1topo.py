@@ -36,7 +36,7 @@ if __name__=="__main__":
     run('ovs-vsctl add-port s1 vxlan0 -- set interface vxlan0 type=vxlan options:remote_ip=' + vm2ip + ' option:key=100 ofport_request=10')
 
     # config MTU
-    run('ifconfig vxlan_sys_4789 mtu 1450')
+    run('ifconfig vxlan_sys_4789 mtu 1500')
     s1 = net.switches[0]
     h1, h2 = net.hosts
     h1.cmdPrint('ifconfig h1-eth0 mtu 1450')

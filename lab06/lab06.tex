@@ -2,13 +2,15 @@
 \endofdump
 \tikzexternalize[prefix=cache/]{lab06}
 \begin{document}
-    \title{Overlay Network and VXLAN (With Bug)}
+    \title{Overlay Network and VXLAN}
     \maketitle
     \tableofcontents
     \vfill
     An overlay network can be thought of as a computer network on top of another network. 
 
     VXLAN is often described as an overlay technology because it allows to stretch Layer 2 connections over an intervening Layer 3 network by encapsulating (tunneling) Ethernet frames in a VXLAN packet that includes IP addresses.
+
+    本文先进行 ping 测试，后进行 iperf 测试。
     \vfill
     \clearpage
     \section{建立网络}
@@ -33,13 +35,21 @@
     %     \caption{拓扑结构}\label{fig:topo}
     % \end{figure}
 
+    VM1 运行
+    \begin{lstlisting}[style=commandshell]
+python vm1topo.py\end{lstlisting}
+
+    VM2 运行
+    \begin{lstlisting}[style=commandshell]
+python vm2topo.py\end{lstlisting}
+
     \begin{figure}[H]
         \centering
         \input{fig/toposym.tex}
         \caption{拓扑结构}\label{fig:toposym}
     \end{figure}
 
-    \section{Wireshark 抓包}
+    \section{Wireshark 抓包}\label{sec:wireshark}
     Use Wireshark to monitor the interfaces s1 and eth0, and describe your findings.
 
     使用 Wireshark 抓取传输时数据，得到如图 \ref{fig:wireshark} 所示的包。外层为 UDP 报文，显示的实际的 IP 地址；中间为 VXLAN 层；再内侧为 Overlay 的 ICMP 报文，显示的是 Overlay IP 地址。
@@ -50,27 +60,12 @@
         \caption{Wireshark 抓包}\label{fig:wireshark}
     \end{figure}
 
-    \section{iperf 测试}
-    Use iperf to test the network bandwidth between the two virtual machines 
-    \begin{itemize}
-        \item Test the bandwidth between 192.168.56.127 and 192.168.56.128
-        \item Test the bandwidth between 10.0.0.1/10.0.0.2/10.0.0.101 and 10.0.0.102 (hint: you may need to specify a reasonable MTU size in order for your iperf to work in this case. Please also think about why.)
-    \end{itemize}
-
-    Compare the above results and explain the reason. 
-
-    % \begin{figure}[H]
-    %     \centering
-    %     \includegraphics[width=0.7\linewidth]{nobuffer}
-    %     \caption{没有可用的缓冲区空间}\label{fig:nobuffer}
-    % \end{figure}
-
-    % 使用控制器\cite{vxlannew}
-
     \section{ping 测试}
     Similar to Q2, use ping to test the network latency and analyze your results.
 
-    如果不调整 MTU 会导致从 h1 ping 出去的时候只有两个包被接收了，之后会提示“没有可用的缓冲区空间”，如图 \ref{fig:wiresharkh1ping} 所示。这是因为 VXLAN 会添加 50 -- 54 Bytes 的额外头部，导致超出 MTU 限制。现在的 bug 是，\textbf{已经调整 MTU 后，仍然无法 ping 通。}
+    \subsection{bug 声明}
+
+    如果不调整 MTU 会导致从 h1 ping 出去的时候只有两个包被接收了，之后会提示“没有可用的缓冲区空间”，如图 \ref{fig:wiresharkh1ping} 所示。这是因为 VXLAN 会添加 50 --- 54 Bytes 的额外头部，导致超出 MTU 限制。现在的 bug 是，\textbf{已经调整 MTU 后，仍然无法 ping 通。}
 
     \begin{figure}[H]
         \centering
@@ -86,7 +81,186 @@
         \caption{同一路径不同发送主动方测试}\label{fig:pingeachother}
     \end{figure}
 
-    下面暂时解决方法是直接将服务请求方全部放在交换机上。以及可能会手写控制器\cite{vxlannew}。
+    下面暂时解决方法是直接将服务请求方全部放在交换机上。
+
+    \subsection{物理IP级测试}
+
+    两个虚拟机分别向对方的真实 IP 进行连通性测试。
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{pingtop}
+        \caption{物理IP级测试}\label{fig:pingtop}
+    \end{figure}
+
+    \subsection{交换机级测试}
+
+    两个虚拟机的mininet交换机分别向对方的交换机进行连通性测试。
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{pingswitch}
+        \caption{交换机级测试}\label{fig:pingswitch}
+    \end{figure}
+
+    \subsection{交换机--主机级测试}
+
+    从交换机向对方虚拟机的主机请求连通性测试。
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{pinghostswitch}
+        \caption{交换机--主机级测试}\label{fig:pinghostswitch}
+    \end{figure}
+
+    \subsection{连通性测试小结}
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[ymin={0},
+                xlabel={VM1 level},
+                ylabel={Average Latency (ms)},
+                legend pos={north west},
+                symbolic x coords={top,switch,switch-host}, xtick=data,
+                ybar,
+                ymax={6},
+                width=\linewidth]
+                 \addplot+ [] table[x=level,y=time,] {fig/pingvm1.dat};
+                 \legend{vm1,}
+                \end{axis}
+            \end{tikzpicture}                
+            \caption{VM1发出连通性平均延迟}\label{fig:pingvm1}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[ymin={0},
+                xlabel={VM2 level},
+                ylabel={Average Latency (ms)},
+                legend pos={north west},
+                symbolic x coords={top,switch,switch-host}, xtick=data,
+                ybar,
+                ymax={6},
+                width=\linewidth]
+                \pgfplotsset{cycle list shift=1};
+                 \addplot+ [] table[x=level,y=time,] {fig/pingvm2.dat};
+                 \legend{vm2,}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{VM2发出连通性测试}\label{fig:pingvm2}
+        \end{minipage}
+    \end{figure}
+
+    VM1 的连通性测试小结如图 \ref{fig:pingvm1} 所示，VM2 如图 \ref{fig:pingvm2} 所示。\textbf{由于 VM1 是链接克隆 VM2 所以会有一定的性能损失。\cite{linkclone}}但是整体而言，直接物理 IP 的延迟最小，因为ping一秒一个且传输较小的包来测试连通性，这个时候交换机级 VxLAN 封装带来的延迟会占上风，ARP需要多次转换，如图 \ref{fig:pingswitchwire}；而物理IP支持各种特性会使这种时延下降，不需要地址转换，让ARP包更加简洁，如图 \ref{fig:pingtopwire}。
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{pingtopwire}
+            \caption{物理 IP 抓包情况}\label{fig:pingtopwire}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{pingswitchwire}
+            \caption{交换机级抓包情况}\label{fig:pingswitchwire}
+        \end{minipage}
+    \end{figure}
+
+    \section{iperf 测试}
+    Use iperf to test the network bandwidth between the two virtual machines 
+    \begin{itemize}
+        \item Test the bandwidth between 192.168.56.127 and 192.168.56.128
+        \item Test the bandwidth between 10.0.0.1/10.0.0.2/10.0.0.101 and 10.0.0.102 (hint: you may need to specify a reasonable MTU size in order for your iperf to work in this case. Please also think about why.)
+    \end{itemize}
+
+    Compare the above results and explain the reason. 
+
+    服务器
+    \begin{lstlisting}[style=commandshell]
+iperf -s\end{lstlisting}
+
+    客户机
+    \begin{lstlisting}[style=commandshell]
+iperf -c [IP]\end{lstlisting}
+
+    % \begin{figure}[H]
+    %     \centering
+    %     \includegraphics[width=0.7\linewidth]{nobuffer}
+    %     \caption{没有可用的缓冲区空间}\label{fig:nobuffer}
+    % \end{figure}
+
+    % 使用控制器\cite{vxlannew}
+
+    \subsection{物理IP级测试}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{iperf0}
+        \caption{物理IP级测试}\label{fig:iperf0}
+    \end{figure}
+
+    \subsection{交换机级测试}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{iperf1}
+        \caption{交换机级测试}\label{fig:iperf1}
+    \end{figure}
+
+    \subsection{交换机--主机级测试}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{iperf2}
+        \caption{交换机--主机测试}\label{fig:iperf2}
+    \end{figure}
+
+    \subsection{带宽测试小结}
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[ymin={0},
+                xlabel={VM1 level},
+                ylabel={Throughput (Mbps)},
+                legend pos={north west},
+                symbolic x coords={top,switch,switch-host}, xtick=data,
+                ybar,
+                width=\linewidth]
+                 \addplot+ [] table[x=level,y=throughput,] {fig/iperfvm1.dat};
+                 \legend{vm1,}
+                \end{axis}
+                \end{tikzpicture}                
+            \caption{VM1发出带宽测试}\label{fig:iperfvm1}
+        \end{minipage}
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[ymin={0},
+                xlabel={VM2 level},
+                ylabel={Throughput (Mbps)},
+                legend pos={north west},
+                symbolic x coords={top,switch,switch-host}, xtick=data,
+                ybar,
+                width=\linewidth]
+                \pgfplotsset{cycle list shift=1};
+                 \addplot+ [] table[x=level,y=throughput,] {fig/iperfvm2.dat};
+                 \legend{vm2,}
+                \end{axis}
+                \end{tikzpicture}       
+            \caption{VM2发出带宽测试}\label{fig:iperfvm2}
+        \end{minipage}
+    \end{figure}
+
+    VM1 和 VM2 的带宽测试小结分别如图 \ref{fig:iperfvm1} 和图 \ref{fig:iperfvm2} 所示。与 ping 不同的是，交换机级与交换机--主机级的带宽较高\footnote{事实上，物理机的带宽没有那么稳定，有时候会达到1.09Gbps。}，原因是VxLAN是交换机的直接端口，连续发包的iperf会让这个直接优势占上风（物理IP发包需要经过交换机）。注意相较于ping的一秒一个包有一定的区别，并且包会稍大。
+
+    \section*{附录}
 
     \begin{table}[H]
         \centering
@@ -94,8 +268,7 @@
         \begin{tabular}{>{\bfseries}cl}
             \toprule
             操作系统 & Ubuntu 18.04.5 \\
-            虚拟软件 & VMWare Workstation \\
-            克隆设置 & 链接克隆与完整克隆皆已测试 \\
+            虚拟软件 & VMWare Workstation 16.0\\
             \bottomrule
         \end{tabular}
     \end{table}
